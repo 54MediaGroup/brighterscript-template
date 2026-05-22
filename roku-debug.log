@@ -1,0 +1,3 @@
+05-21 00:46:51.427 sdkl [beacon.signal] |AppLaunchChainComplete ----> Duration(388 ms)
+05-21 00:46:51.604 sdkl [beacon.signal] |AppLaunchComplete ---------> Pending Render Pass
+05-21 00:46:51.655 sdkl [beacon.signal] |AppLaunchComplete ---------> Duration(337 ms : 255 ms)

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="FirestoreTask" extends="Task">
+    <interface>
+        <field id="projectId" type="string" />
+        <field id="requestType" type="string" />
+        <field id="documentPath" type="string" />
+        <field id="documentName" type="string" />
+        <field id="collectionPath" type="string" />
+        <field id="queryCollection" type="string" />
+        <field id="fieldPath" type="string" />
+        <field id="resultData" type="assocarray" />
+        <field id="errorMessage" type="string" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/FirestoreTask.brs" />
+    <script type="text/brightscript" uri="pkg:/source/bslib.brs" />
+</component>
+<!--//# sourceMappingURL=./FirestoreTask.xml.map -->

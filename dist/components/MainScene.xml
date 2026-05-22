@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+    <interface>
+        <field id="launchArgs" type="assocarray" onChange="onLaunchArgsChanged" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
+    <script type="text/brightscript" uri="pkg:/source/bslib.brs" />
+    <children>
+        <Rectangle width="1280" height="720" color="0x05040AFF" />
+        <Poster id="heroBackdrop" width="1280" height="456" opacity="0" visible="false" loadDisplayMode="scaleToZoom" />
+        <Rectangle width="1280" height="456" color="0x05040ABB" />
+        <Rectangle translation="[0,286]" width="1280" height="170" color="0x090714AA" />
+        <Rectangle translation="[0,456]" width="1280" height="264" color="0x05040AFF" />
+        <Rectangle translation="[92,0]" width="1188" height="106" color="0x05040AFF" />
+        <Rectangle translation="[132,104]" width="1090" height="2" color="0x1E3A8AFF" />
+        <Group id="contentGroup" translation="[122,0]">
+            <Group id="homeGroup" translation="[0,0]" visible="true">
+                <Poster id="heroFullPanel" translation="[-10,92]" width="1148" height="292" uri="pkg:/images/ui/hero-panel.png" loadDisplayMode="scaleToFill" opacity="0.58" />
+                <Group id="heroTextGroup" translation="[0,118]">
+                    <Label id="heroEyebrow" width="420" height="28" text="Featured" color="0xAAB7C8FF" />
+                    <Label id="heroTitle" translation="[0,34]" width="704" height="92" text="Loading..." color="0xFFFFFFFF" />
+                    <Label id="heroDescription" translation="[0,132]" width="688" height="82" wrap="true" text="" color="0xD5DEE9FF" />
+                    <Label id="heroActionHint" translation="[0,226]" width="640" height="28" text="Use arrows to browse" color="0xDBEAFFFF" />
+                </Group>
+                <Group id="heroPosterGroup" translation="[710,123]">
+                    <Poster id="heroPoster" width="416" height="240" loadDisplayMode="scaleToZoom" />
+                    <Poster width="416" height="240" uri="pkg:/images/ui/hero-poster-frame.png" loadDisplayMode="scaleToFill" opacity="0.42" />
+                    <Rectangle translation="[0,188]" width="416" height="52" color="0x000000CC" />
+                    <Label id="heroPosterLabel" translation="[24,200]" width="360" height="30" text="Hosts and on-demand shows" color="0xFFFFFFFF" />
+                </Group>
+                <Group id="ctaGroup" translation="[0,392]" />
+                <Group id="homeRowsGroup" translation="[0,482]" />
+            </Group>
+            <Group id="hostsScreenGroup" translation="[0,112]" visible="false">
+                <Label id="hostsScreenTitle" width="640" height="54" text="Hosts" color="0xFFFFFFFF" />
+                <Label id="hostsScreenSubtitle" translation="[0,58]" width="820" height="34" text="Browse every host account and open their episode library." color="0xAAB7C8FF" />
+                <Group id="hostsGridGroup" translation="[0,116]" />
+                <Label id="hostsEmptyLabel" translation="[0,210]" width="720" height="40" text="" color="0xAAB7C8FF" />
+            </Group>
+            <Group id="hostDetailGroup" translation="[0,0]" visible="false">
+                <Poster id="hostHeroPoster" translation="[0,114]" width="1110" height="260" opacity="0.46" loadDisplayMode="scaleToZoom" />
+                <Rectangle id="hostHeroShade" translation="[0,114]" width="1110" height="260" color="0x00000099" />
+                <Poster id="hostLogoPoster" translation="[28,150]" width="210" height="118" loadDisplayMode="scaleToZoom" />
+                <Label id="hostDetailTitle" translation="[264,146]" width="650" height="58" text="Host" color="0xFFFFFFFF" />
+                <Label id="hostDetailDescription" translation="[266,210]" width="690" height="72" wrap="true" text="" color="0xD5DEE9FF" />
+                <Label id="hostDetailHint" translation="[266,292]" width="560" height="28" text="Select an episode to watch" color="0xDBEAFFFF" />
+                <Label id="hostEpisodesTitle" translation="[0,408]" width="620" height="36" text="Episodes" color="0xFFFFFFFF" />
+                <Group id="hostEpisodesGroup" translation="[0,462]" />
+                <Label id="hostEmptyLabel" translation="[0,500]" width="780" height="40" text="" color="0xAAB7C8FF" />
+            </Group>
+            <Group id="listingScreenGroup" translation="[0,112]" visible="false">
+                <Label id="listingTitle" width="760" height="54" text="On-demand" color="0xFFFFFFFF" />
+                <Label id="listingSubtitle" translation="[0,58]" width="880" height="34" text="Episodes from every host." color="0xAAB7C8FF" />
+                <Group id="listingCategoryGroup" translation="[0,108]" />
+                <Group id="listingGridGroup" translation="[0,116]" />
+                <Label id="listingEmptyLabel" translation="[0,220]" width="780" height="40" text="" color="0xAAB7C8FF" />
+            </Group>
+            <Group id="searchScreenGroup" translation="[0,112]" visible="false">
+                <Label id="searchTitle" width="760" height="54" text="Search" color="0xFFFFFFFF" />
+                <Poster translation="[0,68]" width="474" height="68" uri="pkg:/images/ui/search-box.png" loadDisplayMode="scaleToFill" />
+                <Label id="searchQueryLabel" translation="[24,86]" width="426" height="36" text="Episodes and expert tips" color="0xD5DEE9FF" />
+                <Label id="searchBoxLabel" translation="[0,148]" width="474" height="28" text="OK to type. Right edge or GO opens results." color="0xAAB7C8FF" />
+                <Group id="searchKeyboardGroup" translation="[0,190]" />
+                <Label id="searchResultsTitle" translation="[520,0]" width="500" height="34" text="Recently Added" color="0xFFFFFFFF" />
+                <Group id="searchResultsGroup" translation="[520,54]" />
+                <Label id="searchEmptyLabel" translation="[520,124]" width="500" height="72" wrap="true" text="" color="0xAAB7C8FF" />
+            </Group>
+            <Group id="aboutScreenGroup" translation="[0,122]" visible="false">
+                <Label id="aboutTitle" width="760" height="52" text="About EFTV" color="0xFFFFFFFF" />
+                <Label id="aboutKicker" translation="[0,52]" width="720" height="28" text="Executive functioning, education, motivation, and expert media." color="0x93C5FDFF" />
+                <Poster translation="[-24,92]" width="708" height="194" uri="pkg:/images/ui/hero-panel.png" loadDisplayMode="scaleToFill" opacity="0.58" />
+                <Label id="aboutBody" translation="[0,114]" width="640" height="138" wrap="true" text="Executive Functioning TV is a modern streaming and media platform focused on educational, motivational, and expert-driven content that helps viewers improve executive functioning skills, personal growth, productivity, mental organization, and everyday life management." color="0xD5DEE9FF" />
+                <Poster translation="[724,92]" width="360" height="194" uri="pkg:/images/ui/overlay-panel.png" loadDisplayMode="scaleToFill" opacity="0.72" />
+                <Label id="aboutFeaturesTitle" translation="[752,114]" width="300" height="28" text="Core Features" color="0xFFFFFFFF" />
+                <Label id="aboutFeaturesLeft" translation="[752,152]" width="150" height="108" wrap="true" text="- Live streaming&#10;- On-demand shows&#10;- Host sections&#10;- Expert content" color="0xD5DEE9FF" />
+                <Label id="aboutFeaturesRight" translation="[912,152]" width="150" height="108" wrap="true" text="- Roku TV app&#10;- Scheduling&#10;- CMS tools&#10;- TV and web" color="0xD5DEE9FF" />
+                <Poster translation="[-24,316]" width="1108" height="132" uri="pkg:/images/ui/overlay-panel.png" loadDisplayMode="scaleToFill" opacity="0.66" />
+                <Label id="aboutPlatformTitle" translation="[0,334]" width="440" height="30" text="Platform And CMS" color="0xFFFFFFFF" />
+                <Label id="aboutPlatformBody" translation="[0,370]" width="1030" height="58" wrap="true" text="EFTV combines a custom content management system with Roku and web experiences. Administrators and hosts can upload episodes, manage scheduling, organize shows by channel, control live broadcasts, review analytics, and update branding from one central panel." color="0xD5DEE9FF" />
+                <Label id="aboutMissionTitle" translation="[0,474]" width="440" height="30" text="Mission" color="0xFFFFFFFF" />
+                <Label id="aboutMissionBody" translation="[0,510]" width="1010" height="58" wrap="true" text="The goal of EFTV is to build a professional streaming network that blends entertainment, education, expert advice, and accessible digital media into a clean experience optimized for smart TVs and modern devices." color="0xD5DEE9FF" />
+                <Label id="aboutHint" translation="[0,590]" width="760" height="32" text="Press left for menu. Press back to return home." color="0xDBEAFFFF" />
+            </Group>
+        </Group>
+        <Group id="railGroup" translation="[0,0]">
+            <Rectangle width="92" height="720" color="0x090E16F5" />
+            <Rectangle id="railFocus" translation="[10,118]" width="72" height="48" color="0x2563EBFF" visible="false" />
+            <Poster translation="[8,24]" width="76" height="46" uri="pkg:/images/ui/logo-chip.png" loadDisplayMode="scaleToFill" />
+            <Label id="railLogo" translation="[8,32]" width="76" height="30" text="EFTV" horizAlign="center" vertAlign="center" color="0xFFFFFFFF" />
+            <Rectangle translation="[20,69]" width="52" height="3" color="0xEF4444FF" />
+            <Group id="railNavGroup" translation="[10,126]" />
+            <Label id="railMenuHint" translation="[10,650]" width="72" height="28" text="MENU" horizAlign="center" color="0x93C5FDFF" />
+        </Group>
+        <Group id="topHeaderGroup" translation="[92,0]">
+            <Rectangle width="1188" height="106" color="0x05040AF0" />
+            <Rectangle translation="[40,104]" width="1090" height="2" color="0x1E3A8AFF" />
+            <Label id="appTitle" translation="[30,28]" width="340" height="34" text="EFTV" color="0xEAF0F8FF" />
+            <Label id="sectionLabel" translation="[30,70]" width="520" height="28" text="Home" color="0x93C5FDFF" />
+            <Label id="statusLabel" translation="[790,36]" width="340" height="28" text="Loading" horizAlign="right" color="0x8794A8FF" />
+        </Group>
+        <Rectangle id="sidebarDim" width="1280" height="720" color="0x000000AA" visible="false" />
+        <Group id="sidebarGroup" translation="[-388,0]">
+            <Poster width="388" height="720" uri="pkg:/images/ui/sidebar-panel.png" loadDisplayMode="scaleToFill" />
+            <Rectangle width="5" height="720" color="0x2563EBFF" />
+            <Poster id="sidebarLogoChip" translation="[30,28]" width="92" height="54" uri="pkg:/images/ui/logo-chip.png" loadDisplayMode="scaleToFill" />
+            <Label id="sidebarBrandMark" translation="[30,39]" width="92" height="30" text="EFTV" horizAlign="center" vertAlign="center" color="0xFFFFFFFF" />
+            <Label id="sidebarTitle" translation="[140,28]" width="170" height="42" text="EFTV" vertAlign="center" color="0xFFFFFFFF" />
+            <Label id="sidebarSubtitle" translation="[140,68]" width="170" height="26" text="Streaming" vertAlign="center" color="0x93C5FDFF" />
+            <Group id="menuGroup" translation="[26,146]" />
+            <Label id="sidebarFooter" translation="[36,642]" width="300" height="30" text="Live TV, hosts, and on-demand" color="0x748299FF" />
+        </Group>
+        <Video id="videoPlayer" width="1280" height="720" visible="false" />
+        <Group id="playerOverlayGroup" visible="false">
+            <Rectangle width="1280" height="720" color="0x00000055" />
+            <Group translation="[64,442]">
+                <Poster width="1152" height="214" uri="pkg:/images/ui/overlay-panel.png" loadDisplayMode="scaleToFill" />
+                <Poster id="overlayPoster" translation="[28,26]" width="210" height="118" loadDisplayMode="scaleToZoom" />
+                <Rectangle id="overlayPosterFallback" translation="[28,26]" width="210" height="118" color="0x172233FF" />
+                <Rectangle id="overlayLiveDot" translation="[268,31]" width="12" height="12" color="0xEF4444FF" visible="false" />
+                <Label id="overlayBadge" translation="[288,24]" width="130" height="28" text="ON DEMAND" color="0x93C5FDFF" />
+                <Label id="overlayTitle" translation="[268,58]" width="760" height="42" text="" color="0xFFFFFFFF" />
+                <Label id="overlayMeta" translation="[268,106]" width="760" height="28" text="" color="0xAAB7C8FF" />
+                <Label id="overlayDescription" translation="[268,138]" width="760" height="40" wrap="true" text="" color="0xD5DEE9FF" />
+                <Rectangle id="overlayProgressBg" translation="[28,174]" width="1096" height="6" color="0x2A3444FF" />
+                <Rectangle id="overlayProgressBar" translation="[28,174]" width="1" height="6" color="0x2563EBFF" />
+                <Label id="overlayTime" translation="[28,184]" width="420" height="28" text="" color="0xAAB7C8FF" />
+                <Label id="overlayState" translation="[934,184]" width="190" height="28" horizAlign="right" text="" color="0xFFFFFFFF" />
+            </Group>
+        </Group>
+        <Group id="seekOverlayGroup" visible="false">
+            <Rectangle width="1280" height="720" color="0x00000033" />
+            <Group translation="[144,536]">
+                <Poster width="992" height="88" uri="pkg:/images/ui/seek-panel.png" loadDisplayMode="scaleToFill" />
+                <Label id="seekOverlayState" translation="[28,18]" width="250" height="30" text="Seeking" color="0xFFFFFFFF" />
+                <Label id="seekOverlayTime" translation="[740,18]" width="224" height="30" horizAlign="right" text="" color="0xC8D3E2FF" />
+                <Rectangle translation="[28,58]" width="936" height="7" color="0x2A3444FF" />
+                <Rectangle id="seekProgressBar" translation="[28,58]" width="1" height="7" color="0x2563EBFF" />
+            </Group>
+        </Group>
+        <Timer id="overlayTimer" duration="3.8" repeat="false" />
+        <Timer id="seekOverlayTimer" duration="1.15" repeat="false" />
+        <Timer id="seekCommitTimer" duration="0.22" repeat="false" />
+        <Timer id="progressTimer" duration="1" repeat="true" />
+        <Animation id="sidebarOpenAnim" duration="0.18" easeFunction="outQuad" repeat="false">
+            <Vector2DFieldInterpolator key="[0.0,1.0]" keyValue="[[-388,0],[0,0]]" fieldToInterp="sidebarGroup.translation" />
+        </Animation>
+        <Animation id="sidebarCloseAnim" duration="0.14" easeFunction="outQuad" repeat="false">
+            <Vector2DFieldInterpolator key="[0.0,1.0]" keyValue="[[0,0],[-388,0]]" fieldToInterp="sidebarGroup.translation" />
+        </Animation>
+    </children>
+</component>
+<!--//# sourceMappingURL=./MainScene.xml.map -->

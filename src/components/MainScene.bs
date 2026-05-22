@@ -1,8 +1,3429 @@
 sub init()
     m.top.setFocus(true)
-    m.mainLabel = m.top.findNode("mainLabel")
-    'change the color
-    m.mainLabel.color = "0xFFFFFF"
-    'make the text really big 
-    m.mainLabel.font.size = 100
+    m.top.backgroundColor = "0x05070CFF"
+
+    m.projectId = "efctvcrm"
+    bindNodes()
+    initState()
+    styleText()
+    renderMenu()
+    showScreen("home")
+    setFallbackHome()
+    setStatus("Loading")
+    handleDeepLinkArgs(m.top.launchArgs)
+    loadFirestoreData()
+end sub
+
+sub bindNodes()
+    m.heroBackdrop = m.top.findNode("heroBackdrop")
+    m.appTitle = m.top.findNode("appTitle")
+    m.sectionLabel = m.top.findNode("sectionLabel")
+    m.statusLabel = m.top.findNode("statusLabel")
+    m.sidebarDim = m.top.findNode("sidebarDim")
+    m.sidebarGroup = m.top.findNode("sidebarGroup")
+    m.menuGroup = m.top.findNode("menuGroup")
+    m.railFocus = m.top.findNode("railFocus")
+    m.railNavGroup = m.top.findNode("railNavGroup")
+
+    m.homeGroup = m.top.findNode("homeGroup")
+    m.heroFullPanel = m.top.findNode("heroFullPanel")
+    m.heroTextGroup = m.top.findNode("heroTextGroup")
+    m.heroPosterGroup = m.top.findNode("heroPosterGroup")
+    m.heroPoster = m.top.findNode("heroPoster")
+    m.heroEyebrow = m.top.findNode("heroEyebrow")
+    m.heroTitle = m.top.findNode("heroTitle")
+    m.heroDescription = m.top.findNode("heroDescription")
+    m.heroActionHint = m.top.findNode("heroActionHint")
+    m.ctaGroup = m.top.findNode("ctaGroup")
+    m.homeRowsGroup = m.top.findNode("homeRowsGroup")
+
+    m.hostsScreenGroup = m.top.findNode("hostsScreenGroup")
+    m.hostsGridGroup = m.top.findNode("hostsGridGroup")
+    m.hostsEmptyLabel = m.top.findNode("hostsEmptyLabel")
+
+    m.hostDetailGroup = m.top.findNode("hostDetailGroup")
+    m.hostHeroPoster = m.top.findNode("hostHeroPoster")
+    m.hostHeroShade = m.top.findNode("hostHeroShade")
+    m.hostLogoPoster = m.top.findNode("hostLogoPoster")
+    m.hostDetailTitle = m.top.findNode("hostDetailTitle")
+    m.hostDetailDescription = m.top.findNode("hostDetailDescription")
+    m.hostDetailHint = m.top.findNode("hostDetailHint")
+    m.hostEpisodesTitle = m.top.findNode("hostEpisodesTitle")
+    m.hostEpisodesGroup = m.top.findNode("hostEpisodesGroup")
+    m.hostEmptyLabel = m.top.findNode("hostEmptyLabel")
+
+    m.listingScreenGroup = m.top.findNode("listingScreenGroup")
+    m.listingTitle = m.top.findNode("listingTitle")
+    m.listingSubtitle = m.top.findNode("listingSubtitle")
+    m.listingCategoryGroup = m.top.findNode("listingCategoryGroup")
+    m.listingGridGroup = m.top.findNode("listingGridGroup")
+    m.listingEmptyLabel = m.top.findNode("listingEmptyLabel")
+
+    m.searchScreenGroup = m.top.findNode("searchScreenGroup")
+    m.searchQueryLabel = m.top.findNode("searchQueryLabel")
+    m.searchKeyboardGroup = m.top.findNode("searchKeyboardGroup")
+    m.searchResultsTitle = m.top.findNode("searchResultsTitle")
+    m.searchResultsGroup = m.top.findNode("searchResultsGroup")
+    m.searchEmptyLabel = m.top.findNode("searchEmptyLabel")
+    m.aboutScreenGroup = m.top.findNode("aboutScreenGroup")
+
+    m.videoPlayer = m.top.findNode("videoPlayer")
+    m.playerOverlayGroup = m.top.findNode("playerOverlayGroup")
+    m.overlayPoster = m.top.findNode("overlayPoster")
+    m.overlayPosterFallback = m.top.findNode("overlayPosterFallback")
+    m.overlayLiveDot = m.top.findNode("overlayLiveDot")
+    m.overlayBadge = m.top.findNode("overlayBadge")
+    m.overlayTitle = m.top.findNode("overlayTitle")
+    m.overlayMeta = m.top.findNode("overlayMeta")
+    m.overlayDescription = m.top.findNode("overlayDescription")
+    m.overlayProgressBar = m.top.findNode("overlayProgressBar")
+    m.overlayTime = m.top.findNode("overlayTime")
+    m.overlayState = m.top.findNode("overlayState")
+    m.seekOverlayGroup = m.top.findNode("seekOverlayGroup")
+    m.seekOverlayState = m.top.findNode("seekOverlayState")
+    m.seekOverlayTime = m.top.findNode("seekOverlayTime")
+    m.seekProgressBar = m.top.findNode("seekProgressBar")
+    m.overlayTimer = m.top.findNode("overlayTimer")
+    m.seekOverlayTimer = m.top.findNode("seekOverlayTimer")
+    m.seekCommitTimer = m.top.findNode("seekCommitTimer")
+    m.progressTimer = m.top.findNode("progressTimer")
+    m.sidebarOpenAnim = m.top.findNode("sidebarOpenAnim")
+    m.sidebarCloseAnim = m.top.findNode("sidebarCloseAnim")
+
+    m.videoPlayer.observeField("state", "onVideoStateChanged")
+    m.overlayTimer.observeField("fire", "onOverlayTimerFire")
+    m.seekOverlayTimer.observeField("fire", "onSeekOverlayTimerFire")
+    m.seekCommitTimer.observeField("fire", "onSeekCommitTimerFire")
+    m.progressTimer.observeField("fire", "onProgressTimerFire")
+end sub
+
+sub initState()
+    m.sidebarOpen = false
+    m.currentScreen = "home"
+    m.previousScreen = "home"
+    m.focusArea = "cta"
+    m.focusIndex = 0
+    m.focusRow = 0
+    m.menuIndex = 0
+    m.menuIds = ["home", "live", "hosts", "featured", "ondemand", "search", "about"]
+    m.menuLabels = ["Home", "Live TV", "Hosts", "Featured", "On-demand", "Search", "About"]
+    m.menuRailIconUris = [
+        "pkg:/images/nav/home.png",
+        "pkg:/images/nav/live.png",
+        "pkg:/images/nav/hosts.png",
+        "pkg:/images/nav/featured.png",
+        "pkg:/images/nav/vod.png",
+        "pkg:/images/nav/search.png",
+        "pkg:/images/nav/about.png"
+    ]
+
+    m.homeData = {}
+    m.liveItem = invalid
+    m.hostItems = []
+    m.hostMap = {}
+    m.allShows = []
+    m.allShowsHostIndex = 0
+    m.featuredShows = []
+    m.recentShows = []
+    m.episodeShows = []
+    m.expertTipShows = []
+    m.promoShows = []
+    m.hostEpisodes = []
+    m.currentHost = invalid
+    m.currentListingItems = []
+    m.onDemandCategoryIndex = 0
+    m.aboutScrollOffset = 0
+    m.homeRows = []
+    m.homeRowWindowStarts = []
+    m.hostsWindowStart = 0
+    m.hostEpisodesWindowStart = 0
+    m.listingWindowStart = 0
+    m.searchQuery = ""
+    m.searchKeys = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "SPACE", "DEL", "CLEAR", "GO"]
+    m.searchResults = []
+
+    m.playerItem = invalid
+    m.playerMode = "vod"
+    m.playerOverlayOpen = false
+    m.seekOverlayOpen = false
+    m.playerStarted = false
+    m.lastSeekPosition = invalid
+    m.pendingSeekPosition = invalid
+    m.promoIndex = 0
+    m.playedPromoKeys = []
+    m.pendingResumeItem = invalid
+    m.pendingResumeMode = invalid
+    m.pendingResumePosition = invalid
+    m.resumeSeekPosition = invalid
+    m.nextVodPromoPosition = invalid
+    m.livePromoElapsed = 0
+    m.pendingDeepLinkArgs = invalid
+    m.deepLinkLoadComplete = false
+end sub
+
+sub styleText()
+    applyFont(m.top.findNode("railLogo"), 14, "semibold")
+    applyFont(m.top.findNode("railMenuHint"), 12, "semibold")
+    applyFont(m.top.findNode("sidebarBrandMark"), 15, "semibold")
+    applyFont(m.top.findNode("sidebarTitle"), 30, "semibold")
+    applyFont(m.top.findNode("sidebarSubtitle"), 15, "medium")
+    applyFont(m.top.findNode("sidebarFooter"), 17, "regular")
+    applyFont(m.appTitle, 30, "semibold")
+    applyFont(m.sectionLabel, 19, "medium")
+    applyFont(m.statusLabel, 17, "regular")
+    applyFont(m.heroEyebrow, 18, "semibold")
+    applyFont(m.heroTitle, 52, "semibold")
+    applyFont(m.heroDescription, 22, "regular")
+    applyFont(m.heroActionHint, 20, "medium")
+    applyFont(m.top.findNode("heroPosterLabel"), 20, "semibold")
+    applyFont(m.top.findNode("hostsScreenTitle"), 44, "display")
+    applyFont(m.top.findNode("hostsScreenSubtitle"), 20, "regular")
+    applyFont(m.hostsEmptyLabel, 22, "medium")
+    applyFont(m.hostDetailTitle, 44, "display")
+    applyFont(m.hostDetailDescription, 21, "regular")
+    applyFont(m.hostDetailHint, 18, "medium")
+    applyFont(m.hostEpisodesTitle, 28, "semibold")
+    applyFont(m.hostEmptyLabel, 22, "medium")
+    applyFont(m.listingTitle, 44, "display")
+    applyFont(m.listingSubtitle, 20, "regular")
+    applyFont(m.listingEmptyLabel, 22, "medium")
+    applyFont(m.top.findNode("searchTitle"), 44, "display")
+    applyFont(m.searchQueryLabel, 24, "medium")
+    applyFont(m.top.findNode("searchBoxLabel"), 17, "regular")
+    applyFont(m.searchResultsTitle, 25, "semibold")
+    applyFont(m.searchEmptyLabel, 20, "regular")
+    applyFont(m.top.findNode("aboutTitle"), 44, "display")
+    applyFont(m.top.findNode("aboutKicker"), 18, "medium")
+    applyFont(m.top.findNode("aboutBody"), 20, "regular")
+    applyFont(m.top.findNode("aboutFeaturesTitle"), 24, "semibold")
+    applyFont(m.top.findNode("aboutFeaturesLeft"), 17, "regular")
+    applyFont(m.top.findNode("aboutFeaturesRight"), 17, "regular")
+    applyFont(m.top.findNode("aboutPlatformTitle"), 24, "semibold")
+    applyFont(m.top.findNode("aboutPlatformBody"), 18, "regular")
+    applyFont(m.top.findNode("aboutMissionTitle"), 24, "semibold")
+    applyFont(m.top.findNode("aboutMissionBody"), 18, "regular")
+    applyFont(m.top.findNode("aboutHint"), 19, "medium")
+    applyFont(m.overlayBadge, 18, "semibold")
+    applyFont(m.overlayTitle, 33, "semibold")
+    applyFont(m.overlayMeta, 18, "medium")
+    applyFont(m.overlayDescription, 18, "regular")
+    applyFont(m.overlayTime, 17, "regular")
+    applyFont(m.overlayState, 18, "medium")
+    applyFont(m.seekOverlayState, 22, "semibold")
+    applyFont(m.seekOverlayTime, 19, "regular")
+end sub
+
+sub applyFont(label as object, size as integer, style as string)
+    if label = invalid then return
+
+    label.font.size = size
+
+    if shouldUseCustomFont(style)
+        font = label.font
+        if font = invalid then font = CreateObject("roSGNode", "Font")
+        font.uri = getFontUri(style)
+        font.size = size
+        label.font = font
+    end if
+end sub
+
+function getFontUri(style as string) as string
+    if style = "display" or style = "bold" then return "pkg:/fonts/Roboto-Bold.ttf"
+    if style = "medium" or style = "semibold" then return "pkg:/fonts/Roboto-Medium.ttf"
+    return "pkg:/fonts/Roboto-Regular.ttf"
+end function
+
+function shouldUseCustomFont(style as string) as boolean
+    return style = "display" or style = "bold"
+end function
+
+function uiAsset(name as string) as string
+    return "pkg:/images/ui/" + name
+end function
+
+function createSkinPoster(id as string, assetName as string, width as integer, height as integer) as object
+    poster = CreateObject("roSGNode", "Poster")
+    if id <> "" then poster.id = id
+    poster.uri = uiAsset(assetName)
+    poster.width = width
+    poster.height = height
+    poster.loadDisplayMode = "scaleToFill"
+    return poster
+end function
+
+function getChildById(parent as object, childId as string) as dynamic
+    if parent = invalid then return invalid
+
+    for i = 0 to parent.GetChildCount() - 1
+        child = parent.GetChild(i)
+        if child <> invalid and child.id = childId then return child
+    end for
+
+    return invalid
+end function
+
+sub setFallbackHome()
+    m.appTitle.text = "EFTV"
+    m.sectionLabel.text = "Home"
+    m.heroEyebrow.text = "Featured"
+    m.heroTitle.text = "A better way to watch"
+    m.heroDescription.text = "Live TV, host libraries, and on-demand episodes load from Firestore."
+    m.heroActionHint.text = "Press OK to watch live. Press down to browse."
+end sub
+
+sub loadFirestoreData()
+    loadFirestoreDocument("home", "app/home", "onHomeLoaded")
+    loadFirestoreDocument("live", "live/main", "onLiveLoaded")
+    loadFirestoreCollection("hosts", "channels", "onHostsLoaded")
+end sub
+
+sub onLaunchArgsChanged()
+    handleDeepLinkArgs(m.top.launchArgs)
+end sub
+
+sub handleDeepLinkArgs(args as dynamic)
+    if args = invalid then return
+    if Type(args) <> "roAssociativeArray" then return
+    if not hasText(getDeepLinkContentId(args)) then return
+
+    m.pendingDeepLinkArgs = args
+    processPendingDeepLink()
+end sub
+
+sub processPendingDeepLink()
+    if m.pendingDeepLinkArgs = invalid then return
+
+    contentId = getDeepLinkContentId(m.pendingDeepLinkArgs)
+    mediaType = LCase(safeText(getDeepLinkMediaType(m.pendingDeepLinkArgs), ""))
+    if not hasText(contentId)
+        m.pendingDeepLinkArgs = invalid
+        return
+    end if
+
+    if mediaType = "live" or contentId = "live" or contentId = "live/main"
+        if m.liveItem <> invalid and hasText(m.liveItem.streamUrl)
+            m.pendingDeepLinkArgs = invalid
+            playLive()
+        end if
+        return
+    end if
+
+    item = findDeepLinkEpisode(contentId)
+    if item <> invalid
+        m.pendingDeepLinkArgs = invalid
+        playVod(item)
+        return
+    end if
+
+    host = findDeepLinkHost(contentId)
+    if host <> invalid
+        m.pendingDeepLinkArgs = invalid
+        renderHostDetail(host)
+        return
+    end if
+
+    if m.deepLinkLoadComplete
+        m.pendingDeepLinkArgs = invalid
+        showScreen("home")
+        setStatus("Deep link content unavailable")
+    end if
+end sub
+
+function getDeepLinkContentId(args as object) as string
+    if args = invalid then return ""
+    if hasText(args.contentId) then return args.contentId
+    if hasText(args.contentid) then return args.contentid
+    if hasText(args.ContentId) then return args.ContentId
+    if hasText(args.id) then return args.id
+    return ""
+end function
+
+function getDeepLinkMediaType(args as object) as string
+    if args = invalid then return ""
+    if hasText(args.mediaType) then return args.mediaType
+    if hasText(args.mediatype) then return args.mediatype
+    if hasText(args.MediaType) then return args.MediaType
+    return ""
+end function
+
+function findDeepLinkEpisode(contentId as string) as dynamic
+    item = findItemByContentId(m.allShows, contentId)
+    if item <> invalid then return item
+    item = findItemByContentId(m.featuredShows, contentId)
+    if item <> invalid then return item
+    item = findItemByContentId(m.episodeShows, contentId)
+    if item <> invalid then return item
+    item = findItemByContentId(m.expertTipShows, contentId)
+    if item <> invalid then return item
+    item = findItemByContentId(m.hostEpisodes, contentId)
+    if item <> invalid then return item
+    return invalid
+end function
+
+function findDeepLinkHost(contentId as string) as dynamic
+    return findItemByContentId(m.hostItems, contentId)
+end function
+
+function findItemByContentId(items as object, contentId as string) as dynamic
+    if items = invalid or not hasText(contentId) then return invalid
+
+    target = LCase(contentId)
+    for each item in items
+        if item <> invalid
+            if hasText(item.id) and LCase(item.id) = target then return item
+            if hasText(item.documentId) and LCase(item.documentId) = target then return item
+            if hasText(item.path) and LCase(item.path) = target then return item
+            if hasText(item.streamUrl) and LCase(item.streamUrl) = target then return item
+        end if
+    end for
+
+    return invalid
+end function
+
+sub loadFirestoreDocument(taskKey as string, documentPath as string, callbackName as string)
+    task = CreateObject("roSGNode", "FirestoreTask")
+    task.projectId = m.projectId
+    task.requestType = "document"
+    task.documentPath = documentPath
+    task.observeField("resultData", callbackName)
+    task.observeField("errorMessage", "onFirestoreError")
+    task.control = "RUN"
+    m[taskKey + "Task"] = task
+end sub
+
+sub loadFirestoreCollection(taskKey as string, collectionPath as string, callbackName as string)
+    task = CreateObject("roSGNode", "FirestoreTask")
+    task.projectId = m.projectId
+    task.requestType = "collection"
+    task.collectionPath = collectionPath
+    task.observeField("resultData", callbackName)
+    task.observeField("errorMessage", "onFirestoreError")
+    task.control = "RUN"
+    m[taskKey + "Task"] = task
+end sub
+
+sub loadFirestoreCollectionGroup(taskKey as string, collectionId as string, callbackName as string)
+    task = CreateObject("roSGNode", "FirestoreTask")
+    task.projectId = m.projectId
+    task.requestType = "collectionGroup"
+    task.queryCollection = collectionId
+    task.observeField("resultData", callbackName)
+    task.observeField("errorMessage", "onFirestoreError")
+    task.control = "RUN"
+    m[taskKey + "Task"] = task
+end sub
+
+sub incrementFirestoreView(item as object)
+    if item = invalid then return
+    if not hasText(item.path) then return
+
+    task = CreateObject("roSGNode", "FirestoreTask")
+    task.projectId = m.projectId
+    task.requestType = "increment"
+    task.documentName = item.path
+    task.fieldPath = "viewCount"
+    task.observeField("errorMessage", "onViewCountError")
+    task.control = "RUN"
+    m.viewCountTask = task
+end sub
+
+sub onViewCountError()
+    if m.viewCountTask <> invalid and m.viewCountTask.errorMessage <> ""
+        print "View count update skipped: " + m.viewCountTask.errorMessage
+        m.viewCountTask.errorMessage = ""
+    end if
+end sub
+
+sub onHomeLoaded()
+    m.homeData = m.homeTask.resultData
+
+    if hasText(m.homeData.title) then m.appTitle.text = normalizeBrand(m.homeData.title)
+    if hasText(m.homeData.heroTitle) then m.heroTitle.text = m.homeData.heroTitle
+    if hasText(m.homeData.heroDescription) then m.heroDescription.text = m.homeData.heroDescription
+    homeArt = getArtwork(m.homeData)
+    if hasText(homeArt)
+        m.heroPoster.uri = homeArt
+        m.heroBackdrop.uri = homeArt
+    end if
+
+    setStatus("Home ready")
+end sub
+
+sub onLiveLoaded()
+    m.liveItem = m.liveTask.resultData
+
+    if m.liveItem = invalid then m.liveItem = {}
+    if not hasText(m.liveItem.title) then m.liveItem.title = "Watch Live"
+    m.liveItem.isLive = true
+    m.liveItem.streamFormat = getStreamFormat(m.liveItem)
+    renderHome()
+    setStatus("Live ready")
+end sub
+
+sub onHostsLoaded()
+    if m.hostsTask.resultData.items = invalid
+        m.hostItems = []
+    else
+        m.hostItems = filterVisibleHosts(sortByOrder(m.hostsTask.resultData.items))
+    end if
+
+    buildHostMap()
+    startAllShowsLoad()
+    renderHome()
+    if m.currentScreen = "hosts" then renderHostsScreen()
+    setStatus("Ready")
+end sub
+
+sub startAllShowsLoad()
+    m.allShows = []
+    m.promoShows = []
+    m.allShowsHostIndex = 0
+    loadNextHostShowsForHome()
+end sub
+
+sub loadNextHostShowsForHome()
+    if m.allShowsHostIndex >= m.hostItems.Count()
+        enrichShowsWithHosts()
+        rebuildShowBuckets()
+        m.deepLinkLoadComplete = true
+        renderHome()
+        if m.currentScreen = "featured" then renderListingScreen("featured")
+        if m.currentScreen = "ondemand" then renderListingScreen("ondemand")
+        if m.currentScreen = "search" then renderSearchScreen()
+        processPendingDeepLink()
+        return
+    end if
+
+    host = m.hostItems[m.allShowsHostIndex]
+    if host = invalid or not hasText(host.id)
+        m.allShowsHostIndex++
+        loadNextHostShowsForHome()
+        return
+    end if
+
+    loadFirestoreCollection("allHostShows", "channels/" + host.id + "/shows", "onAllHostShowsLoaded")
+end sub
+
+sub onAllHostShowsLoaded()
+    host = invalid
+    if m.allShowsHostIndex < m.hostItems.Count() then host = m.hostItems[m.allShowsHostIndex]
+
+    if m.allHostShowsTask.resultData.items <> invalid
+        sortedItems = sortByOrder(m.allHostShowsTask.resultData.items)
+        promoItems = filterPromoEpisodes(sortedItems)
+        enrichEpisodeListWithHost(promoItems, host)
+        for each promoItem in promoItems
+            m.promoShows.Push(promoItem)
+        end for
+
+        items = filterVisibleEpisodes(sortedItems)
+        enrichEpisodeListWithHost(items, host)
+        for each item in items
+            m.allShows.Push(item)
+        end for
+    end if
+
+    m.allShowsHostIndex++
+    loadNextHostShowsForHome()
+end sub
+
+sub onAllShowsLoaded()
+    if m.allShowsTask.resultData.items = invalid
+        m.allShows = []
+        m.promoShows = []
+    else
+        sortedItems = sortByOrder(m.allShowsTask.resultData.items)
+        m.promoShows = filterPromoEpisodes(sortedItems)
+        m.allShows = filterVisibleEpisodes(sortedItems)
+    end if
+
+    enrichShowsWithHosts()
+    rebuildShowBuckets()
+    m.deepLinkLoadComplete = true
+    renderHome()
+    if m.currentScreen = "featured" then renderListingScreen("featured")
+    if m.currentScreen = "ondemand" then renderListingScreen("ondemand")
+    if m.currentScreen = "search" then renderSearchScreen()
+    processPendingDeepLink()
+end sub
+
+sub onHostEpisodesLoaded()
+    if m.hostEpisodesTask.resultData.items = invalid
+        m.hostEpisodes = []
+    else
+        m.hostEpisodes = filterVisibleEpisodes(sortByOrder(m.hostEpisodesTask.resultData.items))
+    end if
+
+    enrichEpisodeListWithHost(m.hostEpisodes, m.currentHost)
+    renderHostDetailEpisodes()
+    setStatus("Episodes ready")
+    processPendingDeepLink()
+end sub
+
+sub onFirestoreError()
+    message = "Firestore connection issue"
+
+    if m.homeTask <> invalid and m.homeTask.errorMessage <> "" then message = m.homeTask.errorMessage
+    if m.liveTask <> invalid and m.liveTask.errorMessage <> "" then message = m.liveTask.errorMessage
+    if m.hostsTask <> invalid and m.hostsTask.errorMessage <> "" then message = m.hostsTask.errorMessage
+    if m.hostEpisodesTask <> invalid and m.hostEpisodesTask.errorMessage <> "" then message = m.hostEpisodesTask.errorMessage
+
+    if m.allHostShowsTask <> invalid and m.allHostShowsTask.errorMessage <> ""
+        print "Host shows unavailable: " + m.allHostShowsTask.errorMessage
+        m.allHostShowsTask.errorMessage = ""
+        m.allShowsHostIndex++
+        loadNextHostShowsForHome()
+        return
+    end if
+
+    if m.allShowsTask <> invalid and m.allShowsTask.errorMessage <> ""
+        print "All shows query unavailable: " + m.allShowsTask.errorMessage
+    else
+        print message
+        setStatus(message)
+    end if
+
+    if m.pendingDeepLinkArgs <> invalid
+        m.deepLinkLoadComplete = true
+        processPendingDeepLink()
+    end if
+end sub
+
+sub buildHostMap()
+    m.hostMap = {}
+
+    for each host in m.hostItems
+        if hasText(host.id)
+            m.hostMap[host.id] = host
+        end if
+    end for
+end sub
+
+sub enrichShowsWithHosts()
+    enrichEpisodeListWithHostMap(m.allShows)
+    rebuildShowBuckets()
+end sub
+
+sub enrichEpisodeListWithHostMap(items as object)
+    if items = invalid then return
+
+    for each item in items
+        if hasText(item.hostId)
+            host = m.hostMap[item.hostId]
+            if host <> invalid
+                item.hostName = getHostTitle(host)
+                hostArt = getArtwork(host)
+                if not hasText(item.hostPosterUrl) and hasText(hostArt) then item.hostPosterUrl = hostArt
+            end if
+        end if
+    end for
+end sub
+
+sub enrichEpisodeListWithHost(items as object, host as object)
+    if items = invalid or host = invalid then return
+
+    for each item in items
+        item.hostId = host.id
+        item.hostName = getHostTitle(host)
+        hostArt = getArtwork(host)
+        if not hasText(item.hostPosterUrl) and hasText(hostArt) then item.hostPosterUrl = hostArt
+    end for
+end sub
+
+sub rebuildShowBuckets()
+    m.featuredShows = []
+    m.recentShows = []
+    m.episodeShows = []
+    m.expertTipShows = []
+
+    if m.allShows = invalid then return
+
+    for each item in m.allShows
+        if isFeaturedEpisode(item)
+            m.featuredShows.Push(item)
+        end if
+
+        if isExpertTip(item)
+            m.expertTipShows.Push(item)
+        else
+            m.episodeShows.Push(item)
+        end if
+
+        m.recentShows.Push(item)
+    end for
+end sub
+
+sub renderMenu()
+    clearGroup(m.menuGroup)
+
+    for i = 0 to m.menuLabels.Count() - 1
+        itemGroup = CreateObject("roSGNode", "Group")
+        itemGroup.translation = [0, i * 62]
+
+        bg = createSkinPoster("menuBg", "menu-idle.png", 336, 56)
+
+        icon = CreateObject("roSGNode", "Poster")
+        icon.id = "menuIcon"
+        icon.translation = [22, 11]
+        icon.width = 34
+        icon.height = 34
+        icon.uri = m.menuRailIconUris[i]
+        icon.loadDisplayMode = "scaleToFit"
+        icon.opacity = 0.72
+
+        label = CreateObject("roSGNode", "Label")
+        label.id = "menuLabel"
+        label.translation = [72, 12]
+        label.width = 242
+        label.height = 30
+        label.text = m.menuLabels[i]
+        label.color = "0xC8D3E2FF"
+        applyFont(label, 24, "medium")
+
+        itemGroup.AppendChild(bg)
+        itemGroup.AppendChild(icon)
+        itemGroup.AppendChild(label)
+        m.menuGroup.AppendChild(itemGroup)
+    end for
+
+    renderRailMenu()
+    updateMenuFocus()
+end sub
+
+sub renderRailMenu()
+    clearGroup(m.railNavGroup)
+
+    for i = 0 to m.menuRailIconUris.Count() - 1
+        itemGroup = CreateObject("roSGNode", "Group")
+        itemGroup.translation = [0, i * 58]
+
+        bg = createSkinPoster("railBg", "rail-idle.png", 72, 46)
+
+        icon = CreateObject("roSGNode", "Poster")
+        icon.translation = [20, 7]
+        icon.width = 32
+        icon.height = 32
+        icon.uri = m.menuRailIconUris[i]
+        icon.loadDisplayMode = "scaleToFit"
+        icon.opacity = 0.58
+
+        itemGroup.AppendChild(bg)
+        itemGroup.AppendChild(icon)
+        m.railNavGroup.AppendChild(itemGroup)
+    end for
+
+    updateRailFocus()
+end sub
+
+sub showScreen(screenName as string)
+    m.previousScreen = m.currentScreen
+    m.currentScreen = screenName
+    m.sidebarOpen = false
+    m.sidebarGroup.translation = [-388, 0]
+    m.sidebarDim.visible = false
+
+    m.homeGroup.visible = screenName = "home"
+    m.hostsScreenGroup.visible = screenName = "hosts"
+    m.hostDetailGroup.visible = screenName = "hostDetail"
+    m.listingScreenGroup.visible = screenName = "featured" or screenName = "ondemand"
+    m.searchScreenGroup.visible = screenName = "search"
+    m.aboutScreenGroup.visible = screenName = "about"
+
+    if screenName = "home"
+        m.focusArea = "cta"
+        m.focusIndex = 0
+        m.focusRow = 0
+        m.sectionLabel.text = "Home"
+        renderHome()
+    else if screenName = "hosts"
+        m.focusArea = "hostsGrid"
+        m.focusIndex = 0
+        m.sectionLabel.text = "Hosts"
+        renderHostsScreen()
+    else if screenName = "featured"
+        m.focusArea = "listingGrid"
+        m.focusIndex = 0
+        m.sectionLabel.text = "Featured"
+        renderListingScreen("featured")
+    else if screenName = "ondemand"
+        m.focusArea = "listingCategory"
+        m.focusIndex = m.onDemandCategoryIndex
+        m.sectionLabel.text = "On-demand"
+        renderListingScreen("ondemand")
+    else if screenName = "hostDetail"
+        m.focusArea = "hostEpisodes"
+        m.focusIndex = 0
+        m.sectionLabel.text = "Hosts"
+    else if screenName = "search"
+        m.focusArea = "searchKeyboard"
+        m.focusIndex = 0
+        m.sectionLabel.text = "Search"
+        renderSearchScreen()
+    else if screenName = "about"
+        m.focusArea = "about"
+        m.focusIndex = 0
+        m.aboutScrollOffset = 0
+        m.sectionLabel.text = "About"
+        updateAboutViewport()
+    end if
+
+    updateFocus()
+end sub
+
+sub renderHome()
+    renderCtas()
+
+    m.homeRows = []
+    if m.featuredShows.Count() > 0
+        m.homeRows.Push({
+            id: "featured",
+            title: "Featured Episodes",
+            type: "episode",
+            items: m.featuredShows
+        })
+    end if
+
+    if m.hostItems.Count() > 0
+        m.homeRows.Push({
+            id: "hosts",
+            title: "Hosts",
+            type: "host",
+            items: m.hostItems
+        })
+    end if
+
+    if m.episodeShows.Count() > 0
+        m.homeRows.Push({
+            id: "recent",
+            title: "Recently Added",
+            type: "episode",
+            items: m.episodeShows
+        })
+    end if
+
+    renderHomeRows()
+    updateFocus()
+end sub
+
+sub renderCtas()
+    clearGroup(m.ctaGroup)
+    renderButton(m.ctaGroup, 0, "Watch Now")
+    renderButton(m.ctaGroup, 252, "Continue Watching")
+    renderButton(m.ctaGroup, 504, "Browse Hosts")
+end sub
+
+sub renderButton(parent as object, x as integer, text as string)
+    button = CreateObject("roSGNode", "Group")
+    button.translation = [x, 0]
+
+    glow = createSkinPoster("buttonGlow", "category-focus.png", 228, 72)
+    glow.translation = [-8, -7]
+    glow.visible = false
+
+    bg = createSkinPoster("buttonBg", "category-idle.png", 212, 56)
+
+    label = CreateObject("roSGNode", "Label")
+    label.id = "buttonLabel"
+    label.translation = [0, 17]
+    label.width = 212
+    label.height = 32
+    label.horizAlign = "center"
+    label.text = text
+    label.color = &hE8EEF7FF
+    applyFont(label, getCtaFontSize(text), "semibold")
+
+    button.AppendChild(glow)
+    button.AppendChild(bg)
+    button.AppendChild(label)
+    parent.AppendChild(button)
+end sub
+
+function getCtaFontSize(text as string) as integer
+    if Len(text) > 14 then return 18
+    return 21
+end function
+
+sub renderHomeRows()
+    clearGroup(m.homeRowsGroup)
+    m.homeRowWindowStarts = []
+
+    for r = 0 to m.homeRows.Count() - 1
+        m.homeRowWindowStarts.Push(0)
+        row = m.homeRows[r]
+        rowGroup = CreateObject("roSGNode", "Group")
+        rowGroup.translation = [0, r * 370]
+
+        title = CreateObject("roSGNode", "Label")
+        title.id = "rowTitle"
+        title.width = 620
+        title.height = 34
+        title.text = row.title
+        title.color = "0xFFFFFFFF"
+        applyFont(title, 26, "semibold")
+
+        cards = CreateObject("roSGNode", "Group")
+        cards.id = "cardsGroup"
+        cards.translation = [0, 50]
+
+        indicator = createScrollIndicator()
+        indicator.translation = [962, 7]
+        indicator.visible = false
+
+        renderCardRow(cards, row.items, row.type, 410, 200)
+        row.group = rowGroup
+        row.cardsGroup = cards
+
+        rowGroup.AppendChild(title)
+        rowGroup.AppendChild(indicator)
+        rowGroup.AppendChild(cards)
+        m.homeRowsGroup.AppendChild(rowGroup)
+    end for
+end sub
+
+sub renderHostsScreen()
+    clearGroup(m.hostsGridGroup)
+    m.hostsEmptyLabel.text = ""
+
+    if m.hostItems.Count() = 0
+        m.hostsEmptyLabel.text = "No hosts are available yet."
+        return
+    end if
+
+    m.hostsWindowStart = 0
+    renderPagedCardRows(m.hostsGridGroup, m.hostItems, "host", 410, 200, 5)
+end sub
+
+sub renderHostDetail(host as object)
+    if host = invalid then return
+
+    m.currentHost = host
+    showScreen("hostDetail")
+    m.sectionLabel.text = "Hosts / " + getHostTitle(host)
+    m.hostDetailTitle.text = getHostTitle(host)
+    m.hostDetailDescription.text = safeText(host.description, "Episodes from this host.")
+    m.hostDetailHint.text = "Select an episode to watch."
+    m.hostEmptyLabel.text = "Loading episodes..."
+    m.hostEpisodes = []
+    clearGroup(m.hostEpisodesGroup)
+
+    hostArt = getArtwork(host)
+    hostLogo = getLogoArtwork(host)
+    m.hostHeroPoster.uri = ""
+    m.hostLogoPoster.uri = ""
+
+    if hasText(hostArt)
+        m.hostHeroPoster.uri = hostArt
+    end if
+
+    if hasText(hostLogo)
+        m.hostLogoPoster.uri = hostLogo
+    else if hasText(hostArt)
+        m.hostLogoPoster.uri = hostArt
+    end if
+
+    if hasText(host.id)
+        loadFirestoreCollection("hostEpisodes", "channels/" + host.id + "/shows", "onHostEpisodesLoaded")
+    else
+        m.hostEmptyLabel.text = "This host is missing an ID."
+    end if
+end sub
+
+sub renderHostDetailEpisodes()
+    clearGroup(m.hostEpisodesGroup)
+
+    if m.hostEpisodes.Count() = 0
+        m.hostEmptyLabel.text = "No episodes have been added for this host yet."
+        return
+    end if
+
+    m.hostEmptyLabel.text = ""
+    m.hostEpisodesWindowStart = 0
+    renderPagedCardRows(m.hostEpisodesGroup, m.hostEpisodes, "episode", 410, 200, 5)
+    m.focusArea = "hostEpisodes"
+    m.focusIndex = 0
+    updateFocus()
+end sub
+
+sub renderListingScreen(listingType as string)
+    clearGroup(m.listingGridGroup)
+    clearGroup(m.listingCategoryGroup)
+    m.listingEmptyLabel.text = ""
+    m.listingTitle.visible = true
+    m.listingSubtitle.visible = true
+    m.listingTitle.translation = [0, 0]
+    m.listingSubtitle.translation = [0, 58]
+    m.listingCategoryGroup.translation = [0, 108]
+
+    if listingType = "featured"
+        m.listingCategoryGroup.visible = false
+        m.listingGridGroup.translation = [0, 116]
+        m.listingEmptyLabel.translation = [0, 220]
+        m.listingTitle.text = "Featured"
+        m.listingSubtitle.text = "Highlighted episodes from across every host."
+        m.currentListingItems = m.featuredShows
+    else
+        m.listingCategoryGroup.visible = true
+        m.listingEmptyLabel.translation = [0, 294]
+        m.listingTitle.text = "On-demand"
+        m.listingSubtitle.text = "Choose full episodes or shorter expert tips."
+        renderOnDemandCategories()
+        m.currentListingItems = getOnDemandCategoryItems()
+    end if
+
+    if m.currentListingItems.Count() = 0
+        if listingType = "featured"
+            m.listingEmptyLabel.text = "No featured videos are available yet."
+        else if m.onDemandCategoryIndex = 1
+            m.listingEmptyLabel.text = "No expert tips are available yet."
+        else
+            m.listingEmptyLabel.text = "No episodes are available yet."
+        end if
+        return
+    end if
+
+    m.listingWindowStart = 0
+    renderPagedCardRows(m.listingGridGroup, m.currentListingItems, "episode", 410, 200, 5)
+    updateListingCategoryFocus()
+end sub
+
+sub renderOnDemandCategories()
+    clearGroup(m.listingCategoryGroup)
+    renderCategoryButton(m.listingCategoryGroup, 0, "Episodes", m.episodeShows.Count())
+    renderCategoryButton(m.listingCategoryGroup, 252, "Expert Tips", m.expertTipShows.Count())
+end sub
+
+sub renderCategoryButton(parent as object, x as integer, title as string, count as integer)
+    itemGroup = CreateObject("roSGNode", "Group")
+    itemGroup.translation = [x, 0]
+
+    glow = createSkinPoster("categoryGlow", "category-focus.png", 228, 72)
+    glow.translation = [-8, -7]
+    glow.visible = false
+
+    bg = createSkinPoster("categoryBg", "category-idle.png", 212, 56)
+
+    label = CreateObject("roSGNode", "Label")
+    label.translation = [58, 9]
+    label.width = 156
+    label.height = 26
+    label.text = title
+    label.color = &hE8EEF7FF
+    applyFont(label, 20, "semibold")
+
+    countLabel = CreateObject("roSGNode", "Label")
+    countLabel.translation = [58, 33]
+    countLabel.width = 156
+    countLabel.height = 20
+    countLabel.text = count.ToStr() + " videos"
+    countLabel.color = &h8794A8FF
+    applyFont(countLabel, 14, "regular")
+
+    itemGroup.AppendChild(glow)
+    itemGroup.AppendChild(bg)
+    itemGroup.AppendChild(label)
+    itemGroup.AppendChild(countLabel)
+    parent.AppendChild(itemGroup)
+end sub
+
+function getOnDemandCategoryItems() as object
+    if m.onDemandCategoryIndex = 1 then return m.expertTipShows
+    return m.episodeShows
+end function
+
+function getOnDemandCategoryTitle() as string
+    if m.onDemandCategoryIndex = 1 then return "Expert Tips"
+    return "Episodes"
+end function
+
+sub renderSearchScreen()
+    renderSearchKeyboard()
+    applySearchQuery()
+end sub
+
+sub renderSearchKeyboard()
+    clearGroup(m.searchKeyboardGroup)
+
+    columns = getSearchKeyboardColumns()
+    keyWidth = 70
+    keyHeight = 48
+    gap = 10
+
+    for i = 0 to m.searchKeys.Count() - 1
+        key = m.searchKeys[i]
+        col = i mod columns
+        row = Int(i / columns)
+
+        keyGroup = CreateObject("roSGNode", "Group")
+        keyGroup.translation = [col * (keyWidth + gap), row * (keyHeight + gap)]
+
+        glow = createSkinPoster("keyGlow", "key-focus.png", keyWidth + 14, keyHeight + 14)
+        glow.translation = [-7, -7]
+        glow.visible = false
+
+        bg = createSkinPoster("keyBg", "key-idle.png", keyWidth, keyHeight)
+
+        label = CreateObject("roSGNode", "Label")
+        label.translation = [0, 12]
+        label.width = keyWidth
+        label.height = 24
+        label.text = getSearchKeyLabel(key)
+        label.horizAlign = "center"
+        label.color = &hE8EEF7FF
+        applyFont(label, getSearchKeyFontSize(key), "semibold")
+
+        keyGroup.AppendChild(glow)
+        keyGroup.AppendChild(bg)
+        keyGroup.AppendChild(label)
+        m.searchKeyboardGroup.AppendChild(keyGroup)
+    end for
+end sub
+
+sub applySearchQuery()
+    clearGroup(m.searchResultsGroup)
+    m.searchEmptyLabel.text = ""
+
+    if hasText(m.searchQuery)
+        m.searchQueryLabel.text = m.searchQuery
+        m.searchResultsTitle.text = "Results"
+        m.searchResults = getSearchResults(m.searchQuery)
+    else
+        m.searchQueryLabel.text = "Episodes and expert tips"
+        m.searchResultsTitle.text = "Recently Added"
+        m.searchResults = m.recentShows
+    end if
+
+    if m.searchResults = invalid then m.searchResults = []
+
+    if m.searchResults.Count() > 0
+        renderCardGrid(m.searchResultsGroup, m.searchResults, "episode", 410, 200, 1)
+    else if hasText(m.searchQuery)
+        m.searchEmptyLabel.text = "No matches for " + Chr(34) + m.searchQuery + Chr(34) + "."
+    else
+        m.searchEmptyLabel.text = "No videos are available yet."
+    end if
+
+    updateSearchFocus()
+end sub
+
+function getSearchResults(query as string) as object
+    results = []
+    if not hasText(query) then return m.recentShows
+
+    needle = LCase(query)
+
+    for each item in m.recentShows
+        if itemMatchesSearch(item, needle)
+            results.Push(item)
+        end if
+    end for
+
+    return results
+end function
+
+function itemMatchesSearch(item as object, needle as string) as boolean
+    if item = invalid then return false
+    if not hasText(needle) then return true
+
+    if textContainsSearch(getItemTitle(item), needle) then return true
+    if textContainsSearch(item.description, needle) then return true
+    if textContainsSearch(item.hostName, needle) then return true
+    if textContainsSearch(item.category, needle) then return true
+    if isExpertTip(item) and textContainsSearch("expert tip", needle) then return true
+
+    return false
+end function
+
+function textContainsSearch(value as dynamic, needle as string) as boolean
+    if not hasText(value) then return false
+    return Instr(1, LCase(value), needle) > 0
+end function
+
+function getSearchKeyLabel(key as string) as string
+    if key = "SPACE" then return "SP"
+    if key = "DEL" then return "BACK"
+    if key = "CLEAR" then return "CLR"
+    if key = "GO" then return "GO"
+    return key
+end function
+
+function getSearchKeyFontSize(key as string) as integer
+    if key = "SPACE" or key = "CLEAR" then return 16
+    if key = "DEL" then return 14
+    if key = "GO" then return 18
+    return 21
+end function
+
+sub renderCardRow(parent as object, items as object, cardType as string, cardWidth as integer, imageHeight as integer)
+    clearGroup(parent)
+    if items = invalid then return
+
+    limit = items.Count()
+
+    for i = 0 to limit - 1
+        card = createCard(items[i], cardType, cardWidth, imageHeight)
+        card.translation = [i * (cardWidth - 21), 0]
+        parent.AppendChild(card)
+    end for
+end sub
+
+sub renderPagedCardRows(parent as object, items as object, cardType as string, cardWidth as integer, imageHeight as integer, perRow as integer)
+    clearGroup(parent)
+    if items = invalid then return
+    if perRow <= 0 then perRow = 5
+
+    for i = 0 to items.Count() - 1
+        card = createCard(items[i], cardType, cardWidth, imageHeight)
+        col = i mod perRow
+        row = Int(i / perRow)
+        card.translation = [col * (cardWidth - 21), row * 370]
+        parent.AppendChild(card)
+    end for
+
+    rowCount = Int((items.Count() + perRow - 1) / perRow)
+    for rowIndex = 0 to rowCount - 1
+        firstIndex = rowIndex * perRow
+        rowItemCount = items.Count() - firstIndex
+        if rowItemCount > perRow then rowItemCount = perRow
+        if rowItemCount > 3
+            indicator = createScrollIndicator()
+            indicator.translation = [962, (rowIndex * 370) - 34]
+            indicator.visible = false
+            parent.AppendChild(indicator)
+        end if
+    end for
+end sub
+
+function createScrollIndicator() as object
+    group = CreateObject("roSGNode", "Group")
+    group.id = "rowScrollIndicator"
+
+    label = CreateObject("roSGNode", "Label")
+    label.id = "rowScrollIndicatorLabel"
+    label.width = 140
+    label.height = 24
+    label.horizAlign = "right"
+    label.text = "SCROLL >"
+    label.color = &h93C5FDFF
+    applyFont(label, 16, "semibold")
+
+    group.AppendChild(label)
+    return group
+end function
+
+function isScrollIndicatorNode(node as dynamic) as boolean
+    return node <> invalid and node.id = "rowScrollIndicator"
+end function
+
+sub renderCardGrid(parent as object, items as object, cardType as string, cardWidth as integer, imageHeight as integer, columns as integer)
+    clearGroup(parent)
+    if items = invalid then return
+
+    limit = items.Count()
+
+    for i = 0 to limit - 1
+        card = createCard(items[i], cardType, cardWidth, imageHeight)
+        col = i mod columns
+        row = Int(i / columns)
+        columnGap = 36
+        rowPitch = imageHeight + 118
+        if cardType = "episode"
+            rowPitch = imageHeight + 138
+        end if
+        if parent <> invalid and parent.id = "searchResultsGroup"
+            columnGap = 18
+            rowPitch = imageHeight + 138
+        end if
+        card.translation = [col * (cardWidth + columnGap), row * rowPitch]
+        parent.AppendChild(card)
+    end for
+end sub
+
+function createCard(item as object, cardType as string, cardWidth as integer, imageHeight as integer) as object
+    card = CreateObject("roSGNode", "Group")
+
+    glow = createSkinPoster("focusGlow", "card-glow.png", cardWidth + 34, imageHeight + 106)
+    glow.translation = [-15, -14]
+    glow.visible = false
+
+    focusBg = createSkinPoster("focusBg", "card-bg.png", cardWidth, imageHeight + 114)
+
+    imageWidth = cardWidth - 36
+    imageDisplayHeight = imageHeight - 13
+
+    imageGroup = CreateObject("roSGNode", "Group")
+    imageGroup.id = "imageGroup"
+    imageGroup.translation = [17, 20]
+
+    fallback = CreateObject("roSGNode", "Rectangle")
+    fallback.id = "fallbackBg"
+    fallback.width = imageWidth
+    fallback.height = imageDisplayHeight
+    art = getArtwork(item)
+    fallback.color = getArtworkBackdropColor(cardType, art)
+
+    poster = CreateObject("roSGNode", "Poster")
+    poster.id = "cardPoster"
+    poster.width = imageWidth
+    poster.height = imageDisplayHeight
+    poster.loadDisplayMode = "scaleToZoom"
+    poster.opacity = 1
+    if hasText(art) then poster.uri = art
+
+    title = CreateObject("roSGNode", "Label")
+    title.id = "tileLabel"
+    title.translation = [24, imageHeight + 28]
+    title.width = cardWidth - 38
+    title.height = 20
+    title.text = getItemTitle(item)
+    title.color = "0xDCE6F2FF"
+    applyFont(title, 19, "semibold")
+
+    meta = CreateObject("roSGNode", "Label")
+    meta.id = "tileMeta"
+    meta.translation = [29, imageHeight + 52]
+    meta.width = cardWidth - 43
+    meta.height = 15
+    meta.text = getItemMeta(item, cardType)
+    meta.color = "0x8794A8FF"
+    applyFont(meta, 16, "regular")
+
+    focusLine = CreateObject("roSGNode", "Rectangle")
+    focusLine.id = "focusLine"
+    focusLine.translation = [24, imageHeight + 76]
+    focusLine.width = cardWidth - 48
+    focusLine.height = 3
+    focusLine.color = &hDBEAFFFF
+    focusLine.visible = false
+
+    card.AppendChild(glow)
+    card.AppendChild(focusBg)
+    imageGroup.AppendChild(fallback)
+    imageGroup.AppendChild(poster)
+
+    card.AppendChild(imageGroup)
+    card.AppendChild(title)
+    card.AppendChild(meta)
+    card.AppendChild(focusLine)
+
+    if cardType <> "host" and isExpertTip(item)
+        badge = CreateObject("roSGNode", "Group")
+        badge.translation = [17, 23]
+
+        badgeBg = createSkinPoster("badgeBg", "badge-purple.png", 96, 24)
+
+        badgeLabel = CreateObject("roSGNode", "Label")
+        badgeLabel.translation = [7, 4]
+        badgeLabel.width = 84
+        badgeLabel.height = 18
+        badgeLabel.text = ""
+        badgeLabel.color = &hFFFFFFFF
+        applyFont(badgeLabel, 12, "semibold")
+        badgeLabel.horizAlign = "center"
+
+        badge.AppendChild(badgeBg)
+        badge.AppendChild(badgeLabel)
+        card.AppendChild(badge)
+    else if cardType = "host"
+        badge = CreateObject("roSGNode", "Group")
+        badge.translation = [17, 23]
+
+        badgeBg = createSkinPoster("badgeBg", "badge-host.png", 78, 30)
+
+        badgeLabel = CreateObject("roSGNode", "Label")
+        badgeLabel.translation = [8, 8]
+        badgeLabel.width = 62
+        badgeLabel.height = 20
+        badgeLabel.text = ""
+        badgeLabel.color = &hFFFFFFFF
+        applyFont(badgeLabel, 14, "semibold")
+        badgeLabel.horizAlign = "center"
+
+        badge.AppendChild(badgeBg)
+        badge.AppendChild(badgeLabel)
+        card.AppendChild(badge)
+    end if
+
+    return card
+end function
+
+function getArtworkBackdropColor(cardType as string, art as dynamic) as string
+    if hasText(art) then return "0xF3F6FAFF"
+    return getTileColor(cardType)
+end function
+
+function onKeyEvent(key as string, press as boolean) as boolean
+    if press = false then return false
+    keyName = LCase(key)
+
+    if m.videoPlayer.visible
+        return handlePlayerKey(key)
+    end if
+
+    if m.sidebarOpen
+        handleSidebarKey(key)
+        return true
+    end if
+
+    if keyName = "left"
+        handleLeft()
+        return true
+    else if keyName = "right"
+        handleRight()
+        return true
+    else if keyName = "up"
+        handleUp()
+        return true
+    else if keyName = "down"
+        handleDown()
+        return true
+    else if keyName = "ok" or keyName = "select"
+        selectFocusedItem()
+        return true
+    else if keyName = "back"
+        handleBack()
+        return true
+    end if
+
+    return false
+end function
+
+sub handleLeft()
+    if m.currentScreen = "search"
+        handleSearchLeft()
+        return
+    end if
+
+    if m.currentScreen = "ondemand" and m.focusArea = "listingCategory"
+        if m.focusIndex > 0
+            m.focusIndex--
+            m.onDemandCategoryIndex = m.focusIndex
+            renderListingScreen("ondemand")
+            updateFocus()
+        else
+            openSidebar()
+        end if
+        return
+    end if
+
+    if isPagedCardScreen()
+        columns = getCurrentColumns()
+        if columns > 0 and (m.focusIndex mod columns) = 0
+            openSidebar()
+        else if m.focusIndex > 0
+            m.focusIndex--
+            updateFocus()
+        else
+            openSidebar()
+        end if
+        return
+    end if
+
+    if m.focusIndex > 0
+        m.focusIndex--
+        updateFocus()
+    else
+        openSidebar()
+    end if
+end sub
+
+sub handleRight()
+    if m.currentScreen = "search"
+        handleSearchRight()
+        return
+    end if
+
+    if m.currentScreen = "ondemand" and m.focusArea = "listingCategory"
+        if m.focusIndex < 1
+            m.focusIndex++
+            m.onDemandCategoryIndex = m.focusIndex
+            renderListingScreen("ondemand")
+            updateFocus()
+        end if
+        return
+    end if
+
+    maxIndex = getCurrentMaxIndex()
+    if m.focusIndex < maxIndex
+        m.focusIndex++
+        updateFocus()
+    end if
+end sub
+
+sub handleUp()
+    if m.currentScreen = "home"
+        if m.focusArea = "homeRow"
+            if m.focusRow > 0
+                m.focusRow--
+                m.focusIndex = 0
+                clampFocusToHomeRow()
+            else
+                m.focusArea = "cta"
+                m.focusIndex = 0
+            end if
+        end if
+    else if m.currentScreen = "about"
+        m.aboutScrollOffset = m.aboutScrollOffset - 56
+        if m.aboutScrollOffset < 0 then m.aboutScrollOffset = 0
+        updateAboutViewport()
+    else if m.currentScreen = "search"
+        handleSearchUp()
+    else if m.currentScreen = "ondemand"
+        if m.focusArea = "listingGrid"
+            columns = getCurrentColumns()
+            focusedRow = 0
+            if columns > 0 then focusedRow = Int(m.focusIndex / columns)
+            if focusedRow > 0
+                m.focusIndex = (focusedRow - 1) * columns
+            else
+                m.focusArea = "listingCategory"
+                m.focusIndex = m.onDemandCategoryIndex
+            end if
+        end if
+    else if isPagedCardScreen()
+        columns = getCurrentColumns()
+        if columns > 0
+            focusedRow = Int(m.focusIndex / columns)
+            if focusedRow > 0
+                m.focusIndex = (focusedRow - 1) * columns
+            end if
+        end if
+    else
+        columns = getCurrentColumns()
+        if columns > 0 and m.focusIndex - columns >= 0
+            m.focusIndex = m.focusIndex - columns
+        end if
+    end if
+
+    updateFocus()
+end sub
+
+sub handleDown()
+    if m.currentScreen = "home"
+        if m.focusArea = "cta" and m.homeRows.Count() > 0
+            m.focusArea = "homeRow"
+            m.focusRow = 0
+            m.focusIndex = 0
+        else if m.focusArea = "homeRow" and m.focusRow < m.homeRows.Count() - 1
+            m.focusRow++
+            m.focusIndex = 0
+            clampFocusToHomeRow()
+        end if
+    else if m.currentScreen = "about"
+        m.aboutScrollOffset = m.aboutScrollOffset + 56
+        maxScroll = getAboutMaxScroll()
+        if m.aboutScrollOffset > maxScroll then m.aboutScrollOffset = maxScroll
+        updateAboutViewport()
+    else if m.currentScreen = "search"
+        handleSearchDown()
+    else if m.currentScreen = "ondemand" and m.focusArea = "listingCategory"
+        if m.currentListingItems.Count() > 0
+            m.focusArea = "listingGrid"
+            m.focusIndex = 0
+        end if
+    else if isPagedCardScreen()
+        columns = getCurrentColumns()
+        maxIndex = getCurrentMaxIndex()
+        if columns > 0
+            focusedRow = Int(m.focusIndex / columns)
+            targetIndex = (focusedRow + 1) * columns
+            if targetIndex <= maxIndex
+                m.focusIndex = targetIndex
+            end if
+        end if
+    else
+        columns = getCurrentColumns()
+        maxIndex = getCurrentMaxIndex()
+        if columns > 0
+            targetIndex = m.focusIndex + columns
+            if targetIndex <= maxIndex
+                m.focusIndex = targetIndex
+            else if Int(m.focusIndex / columns) < Int(maxIndex / columns)
+                m.focusIndex = maxIndex
+            end if
+        end if
+    end if
+
+    updateFocus()
+end sub
+
+sub handleSearchLeft()
+    if m.focusArea = "searchKeyboard"
+        col = m.focusIndex mod getSearchKeyboardColumns()
+        if col > 0
+            m.focusIndex--
+            updateFocus()
+        else
+            openSidebar()
+        end if
+    else if m.focusArea = "searchResults"
+        col = m.focusIndex mod getSearchResultColumns()
+        if col > 0
+            m.focusIndex--
+        else
+            m.focusArea = "searchKeyboard"
+            m.focusIndex = 0
+        end if
+        updateFocus()
+    end if
+end sub
+
+sub handleSearchRight()
+    if m.focusArea = "searchKeyboard"
+        columns = getSearchKeyboardColumns()
+        col = m.focusIndex mod columns
+        if col < columns - 1 and m.focusIndex < m.searchKeys.Count() - 1
+            m.focusIndex++
+            updateFocus()
+        else if m.searchResults.Count() > 0
+            focusSearchResults()
+        end if
+    else if m.focusArea = "searchResults"
+        maxIndex = getCurrentMaxIndex()
+        col = m.focusIndex mod getSearchResultColumns()
+        if col < getSearchResultColumns() - 1 and m.focusIndex < maxIndex
+            m.focusIndex++
+            updateFocus()
+        end if
+    end if
+end sub
+
+sub handleSearchUp()
+    if m.focusArea = "searchKeyboard"
+        columns = getSearchKeyboardColumns()
+        if m.focusIndex - columns >= 0
+            m.focusIndex = m.focusIndex - columns
+        end if
+    else if m.focusArea = "searchResults"
+        columns = getSearchResultColumns()
+        if m.focusIndex - columns >= 0
+            m.focusIndex = m.focusIndex - columns
+        else
+            m.focusArea = "searchKeyboard"
+            m.focusIndex = 0
+        end if
+    end if
+end sub
+
+sub handleSearchDown()
+    if m.focusArea = "searchKeyboard"
+        columns = getSearchKeyboardColumns()
+        if m.focusIndex + columns < m.searchKeys.Count()
+            m.focusIndex = m.focusIndex + columns
+        else if m.searchResults.Count() > 0
+            focusSearchResults()
+        end if
+    else if m.focusArea = "searchResults"
+        columns = getSearchResultColumns()
+        maxIndex = getCurrentMaxIndex()
+        targetIndex = m.focusIndex + columns
+        if targetIndex <= maxIndex
+            m.focusIndex = targetIndex
+        else if Int(m.focusIndex / columns) < Int(maxIndex / columns)
+            m.focusIndex = maxIndex
+        end if
+    end if
+end sub
+
+sub focusSearchResults()
+    if m.searchResults = invalid or m.searchResults.Count() = 0 then return
+    m.focusArea = "searchResults"
+    m.focusIndex = 0
+    updateFocus()
+end sub
+
+sub handleBack()
+    if m.currentScreen = "home"
+        openSidebar()
+    else if m.currentScreen = "hostDetail"
+        showScreen("hosts")
+    else
+        showScreen("home")
+    end if
+end sub
+
+sub handleSidebarKey(key as string)
+    keyName = LCase(key)
+
+    if keyName = "up" and m.menuIndex > 0
+        m.menuIndex--
+    else if keyName = "down" and m.menuIndex < m.menuIds.Count() - 1
+        m.menuIndex++
+    else if keyName = "right" or keyName = "back"
+        closeSidebar()
+    else if keyName = "ok" or keyName = "select"
+        selectMenuItem()
+    end if
+
+    updateFocus()
+end sub
+
+sub selectMenuItem()
+    selected = m.menuIds[m.menuIndex]
+    closeSidebar()
+
+    if selected = "live"
+        playLive()
+    else if selected = "hosts"
+        showScreen("hosts")
+    else if selected = "featured"
+        showScreen("featured")
+    else if selected = "ondemand"
+        showScreen("ondemand")
+    else if selected = "search"
+        showScreen("search")
+    else if selected = "about"
+        showScreen("about")
+    else
+        showScreen("home")
+    end if
+end sub
+
+sub selectFocusedItem()
+    item = invalid
+
+    if m.currentScreen = "home"
+        if m.focusArea = "cta"
+            if m.focusIndex = 0
+                playLive()
+            else if m.focusIndex = 1
+                if m.recentShows.Count() > 0
+                    playVod(m.recentShows[0])
+                else
+                    setStatus("No recent episodes yet")
+                end if
+            else
+                showScreen("hosts")
+            end if
+            return
+        end if
+
+        row = getFocusedHomeRow()
+        if row = invalid then return
+        item = row.items[m.focusIndex]
+        if row.type = "host"
+            renderHostDetail(item)
+            return
+        end if
+    else if m.currentScreen = "hosts"
+        if m.hostItems.Count() > m.focusIndex then renderHostDetail(m.hostItems[m.focusIndex])
+        return
+    else if m.currentScreen = "hostDetail"
+        if m.hostEpisodes.Count() > m.focusIndex then item = m.hostEpisodes[m.focusIndex]
+    else if m.currentScreen = "featured"
+        if m.currentListingItems.Count() > m.focusIndex then item = m.currentListingItems[m.focusIndex]
+    else if m.currentScreen = "ondemand"
+        if m.focusArea = "listingCategory"
+            m.onDemandCategoryIndex = m.focusIndex
+            renderListingScreen("ondemand")
+            if m.currentListingItems.Count() > 0
+                m.focusArea = "listingGrid"
+                m.focusIndex = 0
+            else
+                m.focusIndex = m.onDemandCategoryIndex
+            end if
+            updateFocus()
+            return
+        end if
+
+        if m.currentListingItems.Count() > m.focusIndex then item = m.currentListingItems[m.focusIndex]
+    else if m.currentScreen = "search"
+        if m.focusArea = "searchKeyboard"
+            activateSearchKey()
+            return
+        else if m.searchResults.Count() > m.focusIndex
+            item = m.searchResults[m.focusIndex]
+        end if
+    end if
+
+    if item <> invalid then playVod(item)
+end sub
+
+sub activateSearchKey()
+    if m.focusIndex < 0 or m.focusIndex >= m.searchKeys.Count() then return
+
+    key = m.searchKeys[m.focusIndex]
+
+    if key = "SPACE"
+        if hasText(m.searchQuery) and Len(m.searchQuery) < 32
+            m.searchQuery = m.searchQuery + " "
+        end if
+    else if key = "DEL"
+        if Len(m.searchQuery) > 0
+            m.searchQuery = Left(m.searchQuery, Len(m.searchQuery) - 1)
+        end if
+    else if key = "CLEAR"
+        m.searchQuery = ""
+    else if key = "GO"
+        if m.searchResults.Count() > 0
+            focusSearchResults()
+        else
+            setStatus("No search results")
+        end if
+        return
+    else if Len(m.searchQuery) < 32
+        m.searchQuery = m.searchQuery + key
+    end if
+
+    applySearchQuery()
+    updateFocus()
+end sub
+
+sub openSidebar()
+    m.sidebarOpen = true
+    m.sidebarDim.visible = true
+    m.railFocus.visible = false
+    m.sidebarCloseAnim.control = "stop"
+    m.sidebarGroup.translation = [-388, 0]
+    m.sidebarOpenAnim.control = "start"
+    updateFocus()
+end sub
+
+sub closeSidebar()
+    m.sidebarOpen = false
+    m.sidebarDim.visible = false
+    m.railFocus.visible = false
+    m.sidebarOpenAnim.control = "stop"
+    m.sidebarGroup.translation = [0, 0]
+    m.sidebarCloseAnim.control = "start"
+    updateFocus()
+end sub
+
+sub updateFocus()
+    updateMenuFocus()
+    updateRailFocus()
+    updateHomeFocus()
+    updateSearchFocus()
+    updateListingCategoryFocus()
+    updateGridFocus(m.hostsGridGroup, m.currentScreen = "hosts")
+    updateGridFocus(m.hostEpisodesGroup, m.currentScreen = "hostDetail")
+    updateGridFocus(m.listingGridGroup, m.currentScreen = "featured" or (m.currentScreen = "ondemand" and m.focusArea = "listingGrid"))
+    updateGridFocus(m.searchResultsGroup, m.currentScreen = "search" and m.focusArea = "searchResults")
+    updateAboutViewport()
+    updateHeroFromFocus()
+end sub
+
+sub updateMenuFocus()
+    for i = 0 to m.menuGroup.GetChildCount() - 1
+        item = m.menuGroup.GetChild(i)
+        bg = item.GetChild(0)
+        icon = item.GetChild(1)
+        label = item.GetChild(2)
+
+        if i = m.menuIndex and m.sidebarOpen
+            bg.uri = uiAsset("menu-focus.png")
+            icon.opacity = 1
+            label.color = &hFFFFFFFF
+            item.scale = [1.06, 1.06]
+        else if m.menuIds[i] = m.currentScreen or (m.currentScreen = "hostDetail" and m.menuIds[i] = "hosts")
+            bg.uri = uiAsset("menu-current.png")
+            icon.opacity = 0.92
+            label.color = &hFFFFFFFF
+            item.scale = [1, 1]
+        else
+            bg.uri = uiAsset("menu-idle.png")
+            icon.opacity = 0.58
+            label.color = &hC8D3E2FF
+            item.scale = [1, 1]
+        end if
+    end for
+end sub
+
+sub updateRailFocus()
+    if m.railNavGroup = invalid then return
+    m.railFocus.visible = false
+
+    activeIndex = getActiveMenuIndex()
+    for i = 0 to m.railNavGroup.GetChildCount() - 1
+        item = m.railNavGroup.GetChild(i)
+        bg = item.GetChild(0)
+        icon = item.GetChild(1)
+
+        if i = activeIndex and not m.sidebarOpen
+            bg.uri = uiAsset("rail-focus.png")
+            icon.opacity = 1
+            item.scale = [1.08, 1.08]
+        else
+            bg.uri = uiAsset("rail-idle.png")
+            icon.opacity = 0.58
+            item.scale = [1, 1]
+        end if
+    end for
+end sub
+
+function getActiveMenuIndex() as integer
+    active = m.currentScreen
+    if active = "hostDetail" then active = "hosts"
+
+    for i = 0 to m.menuIds.Count() - 1
+        if m.menuIds[i] = active then return i
+    end for
+
+    return m.menuIndex
+end function
+
+sub updateHomeFocus()
+    if m.currentScreen <> "home" then return
+    updateHomeRowsViewport()
+
+    for i = 0 to m.ctaGroup.GetChildCount() - 1
+        button = m.ctaGroup.GetChild(i)
+        glow = button.GetChild(0)
+        bg = button.GetChild(1)
+        label = button.GetChild(2)
+
+        if m.focusArea = "cta" and i = m.focusIndex and not m.sidebarOpen
+            if glow <> invalid then glow.visible = true
+            if bg <> invalid then bg.uri = uiAsset("category-selected.png")
+            label.color = &hFFFFFFFF
+            button.scale = [1, 1]
+        else
+            if glow <> invalid then glow.visible = false
+            if bg <> invalid then bg.uri = uiAsset("category-idle.png")
+            label.color = &hE8EEF7FF
+            button.scale = [1, 1]
+        end if
+    end for
+
+    for r = 0 to m.homeRows.Count() - 1
+        row = m.homeRows[r]
+        if row.cardsGroup <> invalid
+            updateRowCards(row.cardsGroup, m.focusArea = "homeRow" and m.focusRow = r and not m.sidebarOpen)
+        end if
+    end for
+end sub
+
+sub updateListingCategoryFocus()
+    if m.listingCategoryGroup = invalid then return
+
+    for i = 0 to m.listingCategoryGroup.GetChildCount() - 1
+        item = m.listingCategoryGroup.GetChild(i)
+        glow = item.GetChild(0)
+        bg = item.GetChild(1)
+        label = item.GetChild(2)
+        countLabel = item.GetChild(3)
+
+        isFocused = m.currentScreen = "ondemand" and m.focusArea = "listingCategory" and i = m.focusIndex and not m.sidebarOpen
+        isSelected = m.currentScreen = "ondemand" and i = m.onDemandCategoryIndex
+
+        if isFocused
+            if glow <> invalid then glow.visible = true
+            if bg <> invalid then bg.uri = uiAsset("category-selected.png")
+            label.color = &hFFFFFFFF
+            countLabel.color = &hDBEAFFFF
+            item.scale = [1.055, 1.055]
+        else if isSelected
+            if glow <> invalid then glow.visible = false
+            if bg <> invalid then bg.uri = uiAsset("category-selected.png")
+            label.color = &hFFFFFFFF
+            countLabel.color = &h93C5FDFF
+            item.scale = [1, 1]
+        else
+            if glow <> invalid then glow.visible = false
+            if bg <> invalid then bg.uri = uiAsset("category-idle.png")
+            label.color = &hE8EEF7FF
+            countLabel.color = &h8794A8FF
+            item.scale = [1, 1]
+        end if
+    end for
+end sub
+
+sub updateSearchFocus()
+    if m.searchKeyboardGroup = invalid then return
+
+    for i = 0 to m.searchKeyboardGroup.GetChildCount() - 1
+        item = m.searchKeyboardGroup.GetChild(i)
+        glow = item.GetChild(0)
+        bg = item.GetChild(1)
+        label = item.GetChild(2)
+
+        if m.currentScreen = "search" and m.focusArea = "searchKeyboard" and i = m.focusIndex and not m.sidebarOpen
+            if glow <> invalid then glow.visible = true
+            if bg <> invalid then bg.uri = uiAsset("key-idle.png")
+            label.color = &hFFFFFFFF
+            item.scale = [1.06, 1.06]
+        else
+            if glow <> invalid then glow.visible = false
+            if bg <> invalid then bg.uri = uiAsset("key-idle.png")
+            label.color = &hE8EEF7FF
+            item.scale = [1, 1]
+        end if
+    end for
+end sub
+
+sub updateHomeRowsViewport()
+    scrollOffset = 0
+    if m.focusArea = "homeRow"
+        scrollOffset = 306 + (m.focusRow * 370)
+    end if
+
+    m.heroTextGroup.translation = [0, 118 - scrollOffset]
+    if m.heroFullPanel <> invalid then m.heroFullPanel.translation = [-10, 92 - scrollOffset]
+    m.heroPosterGroup.translation = [710, 123 - scrollOffset]
+    m.ctaGroup.translation = [0, 392 - scrollOffset]
+
+    headerVisible = scrollOffset < 240
+    m.heroTextGroup.visible = headerVisible
+    if m.heroFullPanel <> invalid then m.heroFullPanel.visible = headerVisible
+    m.heroPosterGroup.visible = headerVisible
+    m.ctaGroup.visible = headerVisible or m.focusArea = "cta"
+
+    y = 482 - scrollOffset
+    m.homeRowsGroup.translation = [0, y]
+
+    for r = 0 to m.homeRows.Count() - 1
+        row = m.homeRows[r]
+        indicator = invalid
+        if row.group <> invalid then indicator = getChildById(row.group, "rowScrollIndicator")
+        if indicator <> invalid
+            indicator.visible = m.focusArea = "homeRow" and m.focusRow = r and row.items <> invalid and row.items.Count() > 3
+        end if
+
+        if row.cardsGroup <> invalid
+            if m.homeRowWindowStarts = invalid then m.homeRowWindowStarts = []
+            while m.homeRowWindowStarts.Count() <= r
+                m.homeRowWindowStarts.Push(0)
+            end while
+
+            windowStart = m.homeRowWindowStarts[r]
+            if windowStart = invalid then windowStart = 0
+
+            if m.focusArea = "homeRow" and m.focusRow = r
+                if m.focusIndex > windowStart + 2
+                    windowStart = m.focusIndex - 2
+                else if m.focusIndex < windowStart
+                    windowStart = m.focusIndex
+                end if
+
+                maxStart = 0
+                if row.items <> invalid and row.items.Count() > 0
+                    maxStart = row.items.Count() - 1
+                end if
+
+                if windowStart < 0 then windowStart = 0
+                if windowStart > maxStart then windowStart = maxStart
+                m.homeRowWindowStarts[r] = windowStart
+            end if
+
+            cardOffset = windowStart * 389
+            if m.focusArea = "homeRow" and m.focusRow = r and m.focusIndex = windowStart + 2
+                cardOffset = cardOffset + 70
+            end if
+            row.cardsGroup.translation = [-cardOffset, 50]
+        end if
+    end for
+end sub
+
+sub updateGridFocus(group as object, isActive as boolean)
+    if group = invalid then return
+    updateGridViewport(group, isActive)
+    updateRowCards(group, isActive and not m.sidebarOpen)
+end sub
+
+sub updateGridViewport(group as object, isActive as boolean)
+    if group <> invalid and group.id = "hostsGridGroup"
+        updatePagedCardViewport(group, isActive, 116, "hosts")
+        return
+    else if group <> invalid and group.id = "hostEpisodesGroup"
+        updateHostDetailViewport(isActive)
+        return
+    else if group <> invalid and group.id = "searchResultsGroup"
+        updateSearchResultsViewport(isActive)
+        return
+    else if group <> invalid and group.id = "listingGridGroup"
+        updateListingViewport(isActive)
+        return
+    end if
+
+    baseY = getGridBaseY(group)
+    offset = 0
+
+    if isActive
+        columns = getCurrentColumns()
+        if columns > 0
+            focusedRow = Int(m.focusIndex / columns)
+            offset = getFocusedGridOffset(baseY, focusedRow, getGridRowPitch(group), getGridCardHeight(group), getGridSafeBottom(group))
+            updateGridRowVisibility(group, focusedRow, columns)
+        end if
+    else
+        updateGridRowVisibility(group, 0, getCurrentColumns())
+    end if
+
+    group.translation = [0, baseY - offset]
+end sub
+
+sub updateListingViewport(isActive as boolean)
+    if m.currentScreen <> "featured" and m.currentScreen <> "ondemand" then return
+
+    focusedRow = 0
+    if isActive
+        columns = getCurrentColumns()
+        if columns > 0 then focusedRow = Int(m.focusIndex / columns)
+    end if
+
+    baseY = 116
+    if m.currentScreen = "ondemand" then baseY = 190
+
+    updatePagedCardViewport(m.listingGridGroup, isActive, baseY, "listing")
+
+    scrollOffset = focusedRow * 370
+    headerVisible = scrollOffset < 120
+    m.listingTitle.visible = headerVisible
+    m.listingSubtitle.visible = headerVisible
+    m.listingCategoryGroup.visible = m.currentScreen = "ondemand" and (headerVisible or m.focusArea = "listingCategory")
+
+    m.listingTitle.translation = [0, 0 - scrollOffset]
+    m.listingSubtitle.translation = [0, 58 - scrollOffset]
+    m.listingCategoryGroup.translation = [0, 108 - scrollOffset]
+end sub
+
+sub updateAboutViewport()
+    if m.aboutScreenGroup = invalid then return
+
+    if m.currentScreen <> "about"
+        m.aboutScreenGroup.translation = [0, 122]
+        return
+    end if
+
+    if m.aboutScrollOffset = invalid then m.aboutScrollOffset = 0
+    maxScroll = getAboutMaxScroll()
+    if m.aboutScrollOffset < 0 then m.aboutScrollOffset = 0
+    if m.aboutScrollOffset > maxScroll then m.aboutScrollOffset = maxScroll
+
+    m.aboutScreenGroup.translation = [0, 122 - m.aboutScrollOffset]
+end sub
+
+function getAboutMaxScroll() as integer
+    return 84
+end function
+
+sub updateSearchResultsViewport(isActive as boolean)
+    offset = 0
+    baseY = 54
+
+    if isActive
+        focusedRow = Int(m.focusIndex / getSearchResultColumns())
+        offset = getFocusedGridOffset(baseY, focusedRow, 338, 314, getGridSafeBottom(m.searchResultsGroup))
+        updateGridRowVisibility(m.searchResultsGroup, focusedRow, getSearchResultColumns())
+    else
+        updateGridRowVisibility(m.searchResultsGroup, 0, getSearchResultColumns())
+    end if
+
+    m.searchResultsGroup.translation = [520, baseY - offset]
+end sub
+
+sub updateHorizontalCardViewport(group as object, isActive as boolean, baseY as integer, windowName as string)
+    if group = invalid then return
+
+    windowStart = 0
+    if windowName = "hosts"
+        if m.hostsWindowStart <> invalid then windowStart = m.hostsWindowStart
+    else if windowName = "hostEpisodes"
+        if m.hostEpisodesWindowStart <> invalid then windowStart = m.hostEpisodesWindowStart
+    else if windowName = "listing"
+        if m.listingWindowStart <> invalid then windowStart = m.listingWindowStart
+    end if
+
+    if isActive
+        if m.focusIndex > windowStart + 2
+            windowStart = m.focusIndex - 2
+        else if m.focusIndex < windowStart
+            windowStart = m.focusIndex
+        end if
+
+        maxStart = group.GetChildCount() - 1
+        if maxStart < 0 then maxStart = 0
+        if windowStart < 0 then windowStart = 0
+        if windowStart > maxStart then windowStart = maxStart
+
+        if windowName = "hosts"
+            m.hostsWindowStart = windowStart
+        else if windowName = "hostEpisodes"
+            m.hostEpisodesWindowStart = windowStart
+        else if windowName = "listing"
+            m.listingWindowStart = windowStart
+        end if
+    end if
+
+    cardOffset = windowStart * 389
+    if isActive and m.focusIndex = windowStart + 2
+        cardOffset = cardOffset + 70
+    end if
+
+    group.translation = [-cardOffset, baseY]
+
+    for i = 0 to group.GetChildCount() - 1
+        group.GetChild(i).visible = true
+    end for
+end sub
+
+sub updatePagedCardViewport(group as object, isActive as boolean, baseY as integer, windowName as string)
+    if group = invalid then return
+
+    perRow = 5
+    focusedRow = 0
+    focusedCol = 0
+    if isActive
+        focusedRow = Int(m.focusIndex / perRow)
+        focusedCol = m.focusIndex mod perRow
+    end if
+
+    windowStart = 0
+    if windowName = "hosts"
+        if m.hostsWindowStart <> invalid then windowStart = m.hostsWindowStart
+    else if windowName = "hostEpisodes"
+        if m.hostEpisodesWindowStart <> invalid then windowStart = m.hostEpisodesWindowStart
+    else if windowName = "listing"
+        if m.listingWindowStart <> invalid then windowStart = m.listingWindowStart
+    end if
+
+    if isActive
+        if focusedCol > windowStart + 2
+            windowStart = focusedCol - 2
+        else if focusedCol < windowStart
+            windowStart = focusedCol
+        end if
+
+        maxStart = perRow - 1
+        if windowStart < 0 then windowStart = 0
+        if windowStart > maxStart then windowStart = maxStart
+
+        if windowName = "hosts"
+            m.hostsWindowStart = windowStart
+        else if windowName = "hostEpisodes"
+            m.hostEpisodesWindowStart = windowStart
+        else if windowName = "listing"
+            m.listingWindowStart = windowStart
+        end if
+    end if
+
+    cardOffset = windowStart * 389
+    if isActive and focusedCol = windowStart + 2
+        cardOffset = cardOffset + 70
+    end if
+
+    group.translation = [0, baseY - (focusedRow * 370)]
+
+    for i = 0 to group.GetChildCount() - 1
+        cardRow = Int(i / perRow)
+        cardCol = i mod perRow
+        card = group.GetChild(i)
+        if isScrollIndicatorNode(card)
+            indicatorRow = Int((card.translation[1] + 34) / 370)
+            card.visible = isActive and indicatorRow = focusedRow
+            continue for
+        end if
+
+        rowOffset = 0
+        if isActive and cardRow = focusedRow
+            rowOffset = cardOffset
+        end if
+
+        card.translation = [(cardCol * 389) - rowOffset, cardRow * 370]
+
+        if focusedRow > 0
+            card.visible = cardRow >= focusedRow - 1 and cardRow <= focusedRow + 1
+        else
+            card.visible = true
+        end if
+    end for
+end sub
+
+function getFocusedGridOffset(baseY as integer, focusedRow as integer, rowPitch as integer, cardHeight as integer, safeBottom as integer) as integer
+    offset = (baseY + (focusedRow * rowPitch) + cardHeight) - safeBottom
+    if offset < 0 then return 0
+    return offset
+end function
+
+function getGridRowPitch(group as object) as integer
+    if group <> invalid and group.id = "searchResultsGroup" then return 338
+    return 338
+end function
+
+function getGridCardHeight(group as object) as integer
+    if group <> invalid and group.id = "searchResultsGroup" then return 314
+    return 314
+end function
+
+function getGridSafeBottom(group as object) as integer
+    return getSafeContentBottom() - getGridParentTop(group)
+end function
+
+function getGridParentTop(group as object) as integer
+    if group <> invalid
+        if group.id = "listingGridGroup" then return 112
+        if group.id = "hostsGridGroup" then return 112
+        if group.id = "searchResultsGroup" then return 112
+    end if
+
+    return 0
+end function
+
+function getSafeContentBottom() as integer
+    return 672
+end function
+
+sub updateGridRowVisibility(group as object, focusedRow as integer, columns as integer)
+    if group = invalid then return
+    if columns <= 0 then columns = 5
+
+    for i = 0 to group.GetChildCount() - 1
+        card = group.GetChild(i)
+        if isScrollIndicatorNode(card) then continue for
+        row = Int(i / columns)
+
+        if focusedRow > 0
+            card.visible = row >= focusedRow - 1 and row <= focusedRow + 1
+        else
+            card.visible = true
+        end if
+    end for
+end sub
+
+sub updateHostDetailViewport(isActive as boolean)
+    if m.currentScreen <> "hostDetail" then return
+
+    m.hostHeroPoster.visible = true
+    if m.hostHeroShade <> invalid then m.hostHeroShade.visible = true
+    m.hostLogoPoster.visible = true
+    m.hostDetailTitle.visible = true
+    m.hostDetailDescription.visible = true
+    m.hostDetailHint.visible = true
+    m.hostEpisodesTitle.translation = [0, 408]
+
+    updatePagedCardViewport(m.hostEpisodesGroup, isActive, 462, "hostEpisodes")
+end sub
+
+sub updateHostEpisodeVisibility(focusedRow as integer, collapsed as boolean)
+    if m.hostEpisodesGroup = invalid then return
+
+    columns = getCurrentColumns()
+    if columns <= 0 then columns = 5
+
+    for i = 0 to m.hostEpisodesGroup.GetChildCount() - 1
+        card = m.hostEpisodesGroup.GetChild(i)
+        if isScrollIndicatorNode(card) then continue for
+        row = Int(i / columns)
+
+        if collapsed
+            card.visible = row >= focusedRow and row <= focusedRow + 1
+        else
+            card.visible = row = 0
+        end if
+    end for
+end sub
+
+function getGridBaseY(group as object) as integer
+    if group <> invalid
+        if group.id = "hostEpisodesGroup" then return 462
+        if group.id = "searchResultsGroup" then return 188
+        if group.id = "listingGridGroup" and m.currentScreen = "ondemand" then return 190
+    end if
+
+    return 116
+end function
+
+sub updateRowCards(group as object, isActive as boolean)
+    for i = 0 to group.GetChildCount() - 1
+        card = group.GetChild(i)
+        if isScrollIndicatorNode(card) then continue for
+        glow = getChildById(card, "focusGlow")
+        bg = getChildById(card, "focusBg")
+        poster = getChildById(card, "cardPoster")
+        title = getChildById(card, "tileLabel")
+        meta = getChildById(card, "tileMeta")
+        focusLine = getChildById(card, "focusLine")
+
+        if isActive and i = m.focusIndex
+            if glow <> invalid then glow.visible = false
+            if bg <> invalid then bg.uri = uiAsset("card-bg-focus.png")
+            if poster <> invalid then poster.opacity = 1
+            if focusLine <> invalid then focusLine.visible = true
+            card.scale = [1, 1]
+            if title <> invalid then title.color = &hFFFFFFFF
+            if meta <> invalid then meta.color = &hDBEAFFFF
+        else
+            if glow <> invalid then glow.visible = false
+            if bg <> invalid then bg.uri = uiAsset("card-bg.png")
+            if poster <> invalid then poster.opacity = 0.9
+            if focusLine <> invalid then focusLine.visible = false
+            card.scale = [1, 1]
+            if title <> invalid then title.color = &hDCE6F2FF
+            if meta <> invalid then meta.color = &h8794A8FF
+        end if
+    end for
+end sub
+
+sub updateHeroFromFocus()
+    if m.sidebarOpen
+        m.sectionLabel.text = "Menu"
+        setStatus("Choose a section")
+        return
+    end if
+
+    if m.currentScreen = "home"
+        if m.focusArea = "cta"
+            if m.focusIndex = 0
+                updateHeroForItem(m.liveItem, "Live TV", "Press OK to watch live.")
+                setStatus("OK: watch live")
+            else if m.focusIndex = 1
+                if m.recentShows.Count() > 0
+                    updateHeroForItem(m.recentShows[0], "Continue Watching", "Press OK to resume.")
+                    setStatus("OK: continue watching")
+                else
+                    m.heroEyebrow.text = "Continue Watching"
+                    m.heroTitle.text = "Recent episodes will appear here"
+                    m.heroDescription.text = "Once episodes load, this button opens the newest available video."
+                    m.heroActionHint.text = "Press down to browse rows."
+                    setStatus("No recent episodes yet")
+                end if
+            else
+                m.heroEyebrow.text = "Hosts"
+                m.heroTitle.text = "Browse host libraries"
+                m.heroDescription.text = "Open a host account to see every on-demand episode available from that host."
+                m.heroActionHint.text = "Press OK to browse hosts."
+                setStatus("OK: browse hosts")
+            end if
+        else
+            row = getFocusedHomeRow()
+            if row <> invalid and row.items.Count() > m.focusIndex
+                if row.type = "host"
+                    updateHeroForHost(row.items[m.focusIndex])
+                    setStatus("OK: open host")
+                else
+                    focusedItem = row.items[m.focusIndex]
+                    updateHeroForItem(focusedItem, row.title, "Press OK to play.")
+                    setStatus(getPlayStatusText(focusedItem))
+                end if
+            end if
+        end if
+    else if m.currentScreen = "hosts"
+        m.sectionLabel.text = "Hosts"
+        if m.hostItems.Count() > m.focusIndex then updateHeroForHost(m.hostItems[m.focusIndex])
+        setStatus("OK: open host")
+    else if m.currentScreen = "hostDetail"
+        if m.hostEpisodes.Count() > m.focusIndex
+            focusedItem = m.hostEpisodes[m.focusIndex]
+            updateHeroForItem(focusedItem, getHostTitle(m.currentHost), "Press OK to play.")
+            setStatus(getPlayStatusText(focusedItem))
+        end if
+    else if m.currentScreen = "featured"
+        if m.currentListingItems.Count() > m.focusIndex
+            focusedItem = m.currentListingItems[m.focusIndex]
+            updateHeroForItem(focusedItem, m.listingTitle.text, "Press OK to play.")
+            setStatus(getPlayStatusText(focusedItem))
+        else
+            setStatus("OK: play episode")
+        end if
+    else if m.currentScreen = "ondemand"
+        if m.focusArea = "listingCategory"
+            if m.onDemandCategoryIndex = 1
+                setStatus("OK or Down: browse expert tips")
+            else
+                setStatus("OK or Down: browse episodes")
+            end if
+        else if m.currentListingItems.Count() > m.focusIndex
+            focusedItem = m.currentListingItems[m.focusIndex]
+            updateHeroForItem(focusedItem, getOnDemandCategoryTitle(), "Press OK to play.")
+            setStatus(getPlayStatusText(focusedItem))
+        else
+            setStatus("Choose a category")
+        end if
+    else if m.currentScreen = "search"
+        m.sectionLabel.text = "Search"
+        if m.focusArea = "searchKeyboard"
+            key = ""
+            if m.focusIndex >= 0 and m.focusIndex < m.searchKeys.Count() then key = m.searchKeys[m.focusIndex]
+
+            if key = "DEL"
+                setStatus("OK: delete")
+            else if key = "CLEAR"
+                setStatus("OK: clear")
+            else if key = "GO"
+                setStatus("OK: open results")
+            else if key = "SPACE"
+                setStatus("OK: space")
+            else if hasText(key)
+                setStatus("OK: type " + key)
+            else
+                setStatus("Search")
+            end if
+        else if m.searchResults.Count() > m.focusIndex
+            focusedItem = m.searchResults[m.focusIndex]
+            updateHeroForItem(focusedItem, "Search", "Press OK to play.")
+            setStatus(getPlayStatusText(focusedItem))
+        end if
+    else if m.currentScreen = "about"
+        setStatus("Up/Down: scroll | Left: menu")
+    end if
+end sub
+
+sub updateHeroForHost(host as object)
+    if host = invalid then return
+
+    m.heroEyebrow.text = "Host"
+    m.heroTitle.text = getHostTitle(host)
+    m.heroDescription.text = safeText(host.description, "Open this host to browse available episodes.")
+    m.heroActionHint.text = "Press OK to open this host."
+    art = getArtwork(host)
+    if hasText(art)
+        m.heroPoster.uri = art
+        m.heroBackdrop.uri = art
+    end if
+end sub
+
+sub updateHeroForItem(item as object, eyebrow as string, hint as string)
+    if item = invalid then return
+
+    if isExpertTip(item)
+        m.heroEyebrow.text = "Expert Tip"
+    else
+        m.heroEyebrow.text = eyebrow
+    end if
+
+    m.heroTitle.text = getItemTitle(item)
+    m.heroDescription.text = safeText(item.description, "Select to start watching.")
+    m.heroActionHint.text = hint
+    art = getArtwork(item)
+    if hasText(art)
+        m.heroPoster.uri = art
+        m.heroBackdrop.uri = art
+    end if
+end sub
+
+sub playLive()
+    if m.liveItem = invalid
+        setStatus("Live TV is not available.")
+        return
+    end if
+
+    if not hasText(m.liveItem.streamUrl)
+        setStatus("Live TV is missing a stream URL.")
+        return
+    end if
+
+    clearPromoPlaybackState()
+    m.nextVodPromoPosition = invalid
+    m.livePromoElapsed = 0
+    incrementFirestoreView(m.liveItem)
+    playItem(m.liveItem, "live")
+end sub
+
+sub playVod(item as object)
+    if item = invalid then return
+
+    if isPromoEpisode(item)
+        setStatus("This video is hidden from the app.")
+        return
+    end if
+
+    if not hasText(item.streamUrl)
+        setStatus("This episode is missing a video URL.")
+        return
+    end if
+
+    m.pendingResumeItem = invalid
+    m.pendingResumeMode = invalid
+    m.pendingResumePosition = invalid
+    m.resumeSeekPosition = invalid
+    m.nextVodPromoPosition = 900
+    m.livePromoElapsed = 0
+    incrementFirestoreView(item)
+    playItem(item, "vod")
+end sub
+
+sub playItem(item as object, mode as string)
+    m.playerItem = item
+    m.playerMode = mode
+    m.playerStarted = false
+
+    content = CreateObject("roSGNode", "ContentNode")
+    content.url = item.streamUrl
+    content.streamformat = getStreamFormat(item)
+    content.title = getItemTitle(item)
+    content.description = safeText(item.description, "")
+    art = getArtwork(item)
+    if hasText(art)
+        content.hdPosterUrl = art
+        content.sdPosterUrl = art
+    end if
+
+    m.videoPlayer.content = content
+    m.videoPlayer.visible = true
+    m.videoPlayer.control = "play"
+    m.top.setFocus(true)
+    m.progressTimer.control = "start"
+    hidePlayerOverlay()
+    hideSeekOverlay()
+end sub
+
+sub playItemFromPosition(item as object, mode as string, position as dynamic)
+    m.resumeSeekPosition = position
+    playItem(item, mode)
+end sub
+
+sub clearPromoPlaybackState()
+    m.pendingResumeItem = invalid
+    m.pendingResumeMode = invalid
+    m.pendingResumePosition = invalid
+    m.resumeSeekPosition = invalid
+    m.nextVodPromoPosition = invalid
+    m.livePromoElapsed = 0
+end sub
+
+function handlePlayerKey(key as string) as boolean
+    keyName = LCase(key)
+
+    if key = "back"
+        if m.seekOverlayOpen
+            hideSeekOverlay()
+        else if m.playerOverlayOpen
+            hidePlayerOverlay()
+        else
+            stopVideo()
+        end if
+        return true
+    end if
+
+    if keyName = "ok" or keyName = "select"
+        if m.playerOverlayOpen
+            hidePlayerOverlay()
+        else
+            showPlayerOverlay(false)
+        end if
+        return true
+    else if isPlayPauseKey(keyName)
+        togglePlayback()
+        return true
+    else if isRewindKey(keyName)
+        if seekBy(-20)
+            showSeekOverlay("Rewind")
+        end if
+        return true
+    else if isFastForwardKey(keyName)
+        if seekBy(20)
+            showSeekOverlay("Fast Forward")
+        end if
+        return true
+    else if keyName = "replay" or keyName = "instantreplay"
+        if seekBy(-10)
+            showSeekOverlay("Replay")
+        end if
+        return true
+    else if key = "left"
+        if seekBy(-10)
+            showSeekOverlay("Back 10")
+        end if
+        return true
+    else if key = "right"
+        if seekBy(10)
+            showSeekOverlay("Forward 10")
+        end if
+        return true
+    else if key = "up" or key = "down"
+        if m.seekOverlayOpen
+            updateSeekOverlay()
+            m.seekOverlayTimer.control = "stop"
+            m.seekOverlayTimer.control = "start"
+        end if
+        return true
+    end if
+
+    return true
+end function
+
+sub togglePlayback()
+    if m.videoPlayer.state = "playing"
+        m.videoPlayer.control = "pause"
+        showSeekOverlay("Paused")
+    else
+        m.videoPlayer.control = "resume"
+        showSeekOverlay("Playing")
+    end if
+end sub
+
+function seekBy(seconds as integer) as boolean
+    if m.playerMode = "live"
+        showSeekOverlay("LIVE")
+        return false
+    else if m.playerMode = "promo"
+        showSeekOverlay("Promo")
+        return false
+    end if
+
+    current = 0
+    if m.pendingSeekPosition <> invalid
+        current = m.pendingSeekPosition
+    else if m.lastSeekPosition <> invalid
+        current = m.lastSeekPosition
+    else if m.videoPlayer.position <> invalid
+        current = m.videoPlayer.position
+    end if
+
+    target = current + seconds
+    if target < 0 then target = 0
+    if m.videoPlayer.duration <> invalid and m.videoPlayer.duration > 0 and target > m.videoPlayer.duration
+        target = m.videoPlayer.duration
+    end if
+
+    m.lastSeekPosition = target
+    m.pendingSeekPosition = target
+    m.seekCommitTimer.control = "stop"
+    m.seekCommitTimer.control = "start"
+    return true
+end function
+
+function isPlayPauseKey(keyName as string) as boolean
+    return keyName = "play" or keyName = "pause" or keyName = "playpause"
+end function
+
+function isRewindKey(keyName as string) as boolean
+    return keyName = "rewind" or keyName = "rev" or keyName = "reverse"
+end function
+
+function isFastForwardKey(keyName as string) as boolean
+    return keyName = "fastforward" or keyName = "fast_forward" or keyName = "fwd" or keyName = "forward"
+end function
+
+sub stopVideo()
+    m.progressTimer.control = "stop"
+    m.overlayTimer.control = "stop"
+    m.seekOverlayTimer.control = "stop"
+    m.seekCommitTimer.control = "stop"
+    m.videoPlayer.control = "stop"
+    m.videoPlayer.visible = false
+    m.playerOverlayGroup.visible = false
+    m.seekOverlayGroup.visible = false
+    m.playerOverlayOpen = false
+    m.seekOverlayOpen = false
+    m.lastSeekPosition = invalid
+    m.pendingSeekPosition = invalid
+    m.pendingResumeItem = invalid
+    m.pendingResumeMode = invalid
+    m.pendingResumePosition = invalid
+    m.resumeSeekPosition = invalid
+    m.nextVodPromoPosition = invalid
+    m.livePromoElapsed = 0
+    m.top.setFocus(true)
+    updateFocus()
+end sub
+
+sub showPlayerOverlay(autoHide as boolean)
+    hideSeekOverlay()
+    m.playerOverlayOpen = true
+    m.playerOverlayGroup.visible = true
+    updatePlayerOverlay()
+
+    if autoHide and m.videoPlayer.state = "playing"
+        m.overlayTimer.control = "stop"
+        m.overlayTimer.control = "start"
+    end if
+end sub
+
+sub hidePlayerOverlay()
+    m.playerOverlayOpen = false
+    m.playerOverlayGroup.visible = false
+    m.overlayTimer.control = "stop"
+end sub
+
+sub showSeekOverlay(label as string)
+    hidePlayerOverlay()
+    m.seekOverlayOpen = true
+    m.seekOverlayGroup.visible = true
+    m.seekOverlayState.text = getSeekOverlayTitle(label)
+    updateSeekOverlay()
+    m.seekOverlayTimer.control = "stop"
+    m.seekOverlayTimer.control = "start"
+end sub
+
+function getSeekOverlayTitle(label as string) as string
+    if m.playerItem <> invalid and (m.playerMode = "vod" or m.playerMode = "promo")
+        title = getItemTitle(m.playerItem)
+        if hasText(title) then return title
+    end if
+
+    return label
+end function
+
+sub hideSeekOverlay()
+    m.seekOverlayOpen = false
+    m.seekOverlayGroup.visible = false
+    m.lastSeekPosition = invalid
+    m.pendingSeekPosition = invalid
+    m.seekCommitTimer.control = "stop"
+    m.seekOverlayTimer.control = "stop"
+end sub
+
+sub onOverlayTimerFire()
+    hidePlayerOverlay()
+end sub
+
+sub onSeekOverlayTimerFire()
+    commitPendingSeek()
+    hideSeekOverlay()
+end sub
+
+sub onSeekCommitTimerFire()
+    commitPendingSeek()
+end sub
+
+sub commitPendingSeek()
+    if m.pendingSeekPosition = invalid then return
+    if m.videoPlayer.visible <> true then return
+    if m.playerMode = "live" or m.playerMode = "promo"
+        m.pendingSeekPosition = invalid
+        return
+    end if
+
+    m.videoPlayer.seek = m.pendingSeekPosition
+    m.lastSeekPosition = m.pendingSeekPosition
+    m.pendingSeekPosition = invalid
+end sub
+
+sub onProgressTimerFire()
+    maybeStartPromoBreak()
+
+    if m.videoPlayer.visible and m.playerOverlayOpen
+        updatePlayerOverlay()
+    else if m.videoPlayer.visible and m.seekOverlayOpen
+        updateSeekOverlay()
+    end if
+end sub
+
+sub onVideoStateChanged()
+    state = m.videoPlayer.state
+
+    if state = "playing"
+        m.playerStarted = true
+        m.overlayState.text = "Playing"
+        applyPendingResumeSeek()
+        if m.playerOverlayOpen then updatePlayerOverlay()
+    else if state = "paused"
+        m.overlayState.text = "Paused"
+        if m.playerOverlayOpen then updatePlayerOverlay()
+    else if state = "buffering"
+        m.overlayState.text = "Buffering"
+        if m.seekOverlayOpen
+            updateSeekOverlay()
+        else if m.playerOverlayOpen
+            updatePlayerOverlay()
+        end if
+    else if state = "error"
+        m.overlayState.text = "Unable to play"
+        showPlayerOverlay(false)
+    else if state = "finished"
+        if m.playerMode = "promo"
+            resumeEpisodeAfterPromo()
+        else
+            stopVideo()
+        end if
+    end if
+end sub
+
+sub applyPendingResumeSeek()
+    if m.resumeSeekPosition = invalid then return
+    if m.playerMode <> "vod" then return
+
+    seekPosition = Int(m.resumeSeekPosition)
+    if seekPosition > 0
+        m.videoPlayer.seek = seekPosition
+    end if
+
+    m.resumeSeekPosition = invalid
+end sub
+
+sub maybeStartPromoBreak()
+    if m.promoShows = invalid or m.promoShows.Count() = 0 then return
+    if m.videoPlayer.state <> "playing" then return
+    if m.playerMode = "promo" then return
+
+    if m.playerMode = "live"
+        m.livePromoElapsed++
+        if m.livePromoElapsed >= 1500
+            startPromoBreak(invalid)
+        end if
+        return
+    end if
+
+    if m.playerMode <> "vod" then return
+
+    position = 0
+    duration = 0
+    if m.videoPlayer.position <> invalid then position = m.videoPlayer.position
+    if m.videoPlayer.duration <> invalid then duration = m.videoPlayer.duration
+    if m.nextVodPromoPosition = invalid then m.nextVodPromoPosition = 900
+
+    if duration > 0 and duration - position < 45 then return
+
+    if position >= m.nextVodPromoPosition
+        startPromoBreak(position)
+    end if
+end sub
+
+sub startPromoBreak(resumePosition as dynamic)
+    promo = getNextPromo()
+    if promo = invalid then return
+    if not hasText(promo.streamUrl) then return
+
+    m.pendingResumeItem = m.playerItem
+    m.pendingResumeMode = m.playerMode
+    m.pendingResumePosition = resumePosition
+    if m.playerMode = "vod"
+        if resumePosition <> invalid
+            m.nextVodPromoPosition = (Int(resumePosition / 900) + 1) * 900
+        else
+            m.nextVodPromoPosition = m.nextVodPromoPosition + 900
+        end if
+    else if m.playerMode = "live"
+        m.livePromoElapsed = 0
+    end if
+    incrementFirestoreView(promo)
+    playItem(promo, "promo")
+    showPlayerOverlay(true)
+end sub
+
+function getNextPromo() as dynamic
+    if m.promoShows = invalid or m.promoShows.Count() = 0 then return invalid
+    if m.promoIndex = invalid then m.promoIndex = 0
+    if m.playedPromoKeys = invalid then m.playedPromoKeys = []
+
+    playableCount = getPlayablePromoCount()
+    if playableCount = 0 then return invalid
+    if m.playedPromoKeys.Count() >= playableCount then m.playedPromoKeys = []
+
+    promo = findNextUnplayedPromo(playableCount)
+    if promo <> invalid then return promo
+
+    m.playedPromoKeys = []
+    return findNextUnplayedPromo(playableCount)
+end function
+
+function findNextUnplayedPromo(playableCount as integer) as dynamic
+    if m.promoShows = invalid or m.promoShows.Count() = 0 then return invalid
+
+    attempts = 0
+    while attempts < m.promoShows.Count()
+        if m.promoIndex >= m.promoShows.Count() then m.promoIndex = 0
+
+        promo = m.promoShows[m.promoIndex]
+        m.promoIndex++
+        attempts++
+
+        if promo <> invalid and hasText(promo.streamUrl)
+            key = getPromoKey(promo)
+            if not stringArrayContains(m.playedPromoKeys, key)
+                m.playedPromoKeys.Push(key)
+                return promo
+            end if
+        end if
+    end while
+
+    return invalid
+end function
+
+function getPlayablePromoCount() as integer
+    if m.promoShows = invalid then return 0
+
+    keys = []
+    for each promo in m.promoShows
+        if promo <> invalid and hasText(promo.streamUrl)
+            key = getPromoKey(promo)
+            if not stringArrayContains(keys, key)
+                keys.Push(key)
+            end if
+        end if
+    end for
+
+    return keys.Count()
+end function
+
+function getPromoKey(promo as object) as string
+    if promo = invalid then return ""
+    if hasText(promo.id) then return promo.id
+    if hasText(promo.documentId) then return promo.documentId
+    if hasText(promo.streamUrl) then return promo.streamUrl
+    return getItemTitle(promo)
+end function
+
+function stringArrayContains(items as object, value as string) as boolean
+    if items = invalid then return false
+
+    for each item in items
+        if item = value then return true
+    end for
+
+    return false
+end function
+
+sub resumeEpisodeAfterPromo()
+    item = m.pendingResumeItem
+    mode = m.pendingResumeMode
+    position = m.pendingResumePosition
+    m.pendingResumeItem = invalid
+    m.pendingResumeMode = invalid
+    m.pendingResumePosition = invalid
+
+    if item = invalid
+        stopVideo()
+        return
+    end if
+
+    if mode = "live"
+        playItem(item, "live")
+    else
+        playItemFromPosition(item, "vod", position)
+    end if
+    showPlayerOverlay(true)
+end sub
+
+sub updatePlayerOverlay()
+    item = m.playerItem
+    if item = invalid then return
+
+    if m.playerMode = "live"
+        m.overlayBadge.text = "LIVE"
+        m.overlayBadge.color = "0xEF4444FF"
+        if m.overlayLiveDot <> invalid then m.overlayLiveDot.visible = true
+    else if m.playerMode = "promo"
+        m.overlayBadge.text = "PROMO"
+        m.overlayBadge.color = "0xEF4444FF"
+        if m.overlayLiveDot <> invalid then m.overlayLiveDot.visible = false
+    else if isExpertTip(item)
+        m.overlayBadge.text = "EXPERT TIP"
+        m.overlayBadge.color = "0xEF4444FF"
+        if m.overlayLiveDot <> invalid then m.overlayLiveDot.visible = false
+    else
+        m.overlayBadge.text = "ON DEMAND"
+        m.overlayBadge.color = "0x93C5FDFF"
+        if m.overlayLiveDot <> invalid then m.overlayLiveDot.visible = false
+    end if
+
+    m.overlayTitle.text = getItemTitle(item)
+    hostName = safeText(item.hostName, "")
+    if m.playerMode = "live"
+        m.overlayMeta.text = safeText(item.hostName, "Live TV")
+    else if m.playerMode = "promo"
+        m.overlayMeta.text = "We'll be right back"
+    else if isExpertTip(item)
+        if hasText(hostName)
+            m.overlayMeta.text = "Expert Tip - short video - " + hostName
+        else
+            m.overlayMeta.text = "Expert Tip - short video"
+        end if
+    else if hasText(hostName)
+        m.overlayMeta.text = hostName
+    else
+        m.overlayMeta.text = getStreamFormat(item)
+    end if
+
+    m.overlayDescription.text = safeText(item.description, "")
+    art = getArtwork(item)
+    if hasText(art)
+        m.overlayPoster.uri = art
+        m.overlayPosterFallback.visible = false
+    else
+        m.overlayPosterFallback.visible = true
+    end if
+
+    updateProgress()
+end sub
+
+sub updateSeekOverlay()
+    position = 0
+    duration = 0
+    if m.videoPlayer.position <> invalid then position = m.videoPlayer.position
+    if m.lastSeekPosition <> invalid then position = m.lastSeekPosition
+    if m.videoPlayer.duration <> invalid then duration = m.videoPlayer.duration
+
+    if duration > 0
+        width = Int((position / duration) * 936)
+        if width < 1 then width = 1
+        if width > 936 then width = 936
+        m.seekProgressBar.width = width
+        m.seekOverlayTime.text = formatSeconds(position) + " / " + formatSeconds(duration)
+    else
+        m.seekProgressBar.width = 1
+        if m.playerMode = "live"
+            m.seekOverlayTime.text = "LIVE"
+        else
+            m.seekOverlayTime.text = formatSeconds(position)
+        end if
+    end if
+end sub
+
+sub updateProgress()
+    if m.playerMode = "live"
+        m.overlayProgressBar.width = 1096
+        m.overlayTime.text = "Live broadcast"
+        if m.videoPlayer.state = "buffering"
+            m.overlayState.text = "Buffering"
+        else
+            m.overlayState.text = "LIVE"
+        end if
+        return
+    end if
+
+    position = 0
+    duration = 0
+    if m.videoPlayer.position <> invalid then position = m.videoPlayer.position
+    if m.videoPlayer.duration <> invalid then duration = m.videoPlayer.duration
+
+    if duration > 0
+        width = Int((position / duration) * 1096)
+        if width < 1 then width = 1
+        if width > 1096 then width = 1096
+        m.overlayProgressBar.width = width
+        m.overlayTime.text = formatSeconds(position) + " / " + formatSeconds(duration)
+    else
+        m.overlayProgressBar.width = 1
+        m.overlayTime.text = formatSeconds(position)
+    end if
+
+    if m.playerMode = "promo"
+        m.overlayState.text = "Promo"
+    else if m.videoPlayer.state = "paused"
+        m.overlayState.text = "Paused"
+    else if m.videoPlayer.state = "buffering"
+        m.overlayState.text = "Buffering"
+    else if m.videoPlayer.state = "error"
+        m.overlayState.text = "Playback error"
+    else
+        m.overlayState.text = "Playing"
+    end if
+end sub
+
+function getCurrentMaxIndex() as integer
+    if m.currentScreen = "home"
+        if m.focusArea = "cta" then return 2
+        row = getFocusedHomeRow()
+        if row <> invalid and row.items.Count() > 0 then return row.items.Count() - 1
+    else if m.currentScreen = "hosts"
+        if m.hostItems.Count() > 0 then return m.hostItems.Count() - 1
+    else if m.currentScreen = "hostDetail"
+        if m.hostEpisodes.Count() > 0 then return m.hostEpisodes.Count() - 1
+    else if m.currentScreen = "featured"
+        if m.currentListingItems.Count() > 0 then return m.currentListingItems.Count() - 1
+    else if m.currentScreen = "ondemand"
+        if m.focusArea = "listingCategory" then return 1
+        if m.currentListingItems.Count() > 0 then return m.currentListingItems.Count() - 1
+    else if m.currentScreen = "search"
+        if m.focusArea = "searchKeyboard" then return m.searchKeys.Count() - 1
+        if m.searchResults.Count() > 0 then return m.searchResults.Count() - 1
+    end if
+
+    return 0
+end function
+
+function getCurrentColumns() as integer
+    if m.currentScreen = "home" then return 0
+    if m.currentScreen = "search"
+        if m.focusArea = "searchKeyboard" then return getSearchKeyboardColumns()
+        return getSearchResultColumns()
+    end if
+    if m.currentScreen = "hosts" then return 5
+    if m.currentScreen = "featured" or m.currentScreen = "ondemand" then return 5
+    if m.currentScreen = "hostDetail" then return 5
+    return 4
+end function
+
+function isPagedCardScreen() as boolean
+    if m.currentScreen = "hosts" then return true
+    if m.currentScreen = "featured" then return true
+    if m.currentScreen = "hostDetail" then return true
+    if m.currentScreen = "ondemand" and m.focusArea = "listingGrid" then return true
+    return false
+end function
+
+function getSearchKeyboardColumns() as integer
+    return 6
+end function
+
+function getSearchResultColumns() as integer
+    return 1
+end function
+
+function getFocusedHomeRow() as dynamic
+    if m.homeRows.Count() = 0 then return invalid
+    if m.focusRow >= m.homeRows.Count() then m.focusRow = m.homeRows.Count() - 1
+    return m.homeRows[m.focusRow]
+end function
+
+sub clampFocusToHomeRow()
+    row = getFocusedHomeRow()
+    if row = invalid
+        m.focusIndex = 0
+    else if m.focusIndex >= row.items.Count()
+        m.focusIndex = row.items.Count() - 1
+        if m.focusIndex < 0 then m.focusIndex = 0
+    end if
+end sub
+
+function sortByOrder(items as object) as object
+    sorted = []
+    if items = invalid then return sorted
+
+    for each item in items
+        sorted.Push(item)
+    end for
+
+    for i = 0 to sorted.Count() - 2
+        for j = i + 1 to sorted.Count() - 1
+            if getSortOrder(sorted[j]) < getSortOrder(sorted[i])
+                temp = sorted[i]
+                sorted[i] = sorted[j]
+                sorted[j] = temp
+            end if
+        end for
+    end for
+
+    return sorted
+end function
+
+function filterVisibleHosts(items as object) as object
+    visible = []
+    if items = invalid then return visible
+
+    for each item in items
+        if not isArchivedHost(item)
+            visible.Push(item)
+        end if
+    end for
+
+    return visible
+end function
+
+function filterVisibleEpisodes(items as object) as object
+    visible = []
+    if items = invalid then return visible
+
+    for each item in items
+        if not isPromoEpisode(item)
+            visible.Push(item)
+        end if
+    end for
+
+    return visible
+end function
+
+function filterPromoEpisodes(items as object) as object
+    promos = []
+    if items = invalid then return promos
+
+    for each item in items
+        if isPromoEpisode(item)
+            promos.Push(item)
+        end if
+    end for
+
+    return promos
+end function
+
+function isFeaturedEpisode(item as object) as boolean
+    return getBooleanField(item, ["Featured", "featured", "isFeatured", "IsFeatured"])
+end function
+
+function isExpertTip(item as object) as boolean
+    return getBooleanField(item, ["ExpertTips", "expertTips", "ExpertTip", "expertTip", "isExpertTip", "IsExpertTip"])
+end function
+
+function isPromoEpisode(item as object) as boolean
+    return getBooleanField(item, ["Promo", "promo", "isPromo", "IsPromo"])
+end function
+
+function isArchivedHost(item as object) as boolean
+    return getBooleanField(item, ["Archive", "archive", "Archived", "archived", "isArchived", "IsArchived"])
+end function
+
+function getBooleanField(item as object, fieldNames as object) as boolean
+    if item = invalid or fieldNames = invalid then return false
+
+    for each fieldName in fieldNames
+        value = item[fieldName]
+        if value <> invalid
+            valueType = LCase(Type(value))
+
+            if valueType = "boolean" or valueType = "roboolean"
+                return value
+            else if valueType = "string" or valueType = "rostring"
+                text = LCase(value)
+                if text = "true" or text = "1" or text = "yes" then return true
+                if text = "false" or text = "0" or text = "no" then return false
+            else if valueType = "integer" or valueType = "roint" or valueType = "rointeger" or valueType = "longinteger" or valueType = "rolonginteger"
+                return value <> 0
+            end if
+        end if
+    end for
+
+    return false
+end function
+
+function getSortOrder(item as object) as integer
+    if item <> invalid and item.sortOrder <> invalid then return item.sortOrder.ToInt()
+    return 9999
+end function
+
+function getStreamFormat(item as object) as string
+    if item <> invalid and hasText(item.streamFormat) then return LCase(item.streamFormat)
+
+    if item <> invalid and hasText(item.streamUrl)
+        url = LCase(item.streamUrl)
+        if Instr(1, url, ".m3u8") > 0 then return "hls"
+        if Instr(1, url, ".mp4") > 0 then return "mp4"
+    end if
+
+    return "mp4"
+end function
+
+function getHostTitle(host as object) as string
+    if host = invalid then return "Host"
+    if hasText(host.title) then return host.title
+    if hasText(host.name) then return host.name
+    return "Host"
+end function
+
+function getItemTitle(item as object) as string
+    if item = invalid then return "Untitled"
+    if hasText(item.title) then return item.title
+    if hasText(item.name) then return item.name
+    return "Untitled"
+end function
+
+function getItemMeta(item as object, cardType as string) as string
+    if item = invalid then return ""
+    if cardType = "host" then return "Host"
+
+    detail = ""
+    if hasText(item.durationText)
+        detail = item.durationText
+    else if hasText(item.hostName)
+        detail = item.hostName
+    else if hasText(item.streamFormat)
+        detail = UCase(item.streamFormat)
+    end if
+
+    if isExpertTip(item)
+        if hasText(detail) then return "Expert Tip - " + detail
+        return "Expert Tip"
+    end if
+
+    if hasText(detail) then return detail
+    return "Episode"
+end function
+
+function getPlayStatusText(item as object) as string
+    if isExpertTip(item) then return "OK: play expert tip"
+    return "OK: play episode"
+end function
+
+function getArtwork(item as object) as string
+    if item = invalid then return ""
+    fields = [
+        "posterUrl", "posterURL", "poster",
+        "thumbnailUrl", "thumbnailURL", "thumbnail", "thumbUrl",
+        "imageUrl", "imageURL", "image", "imageSrc",
+        "artworkUrl", "artworkURL", "artwork",
+        "coverUrl", "coverImageUrl", "bannerUrl", "bannerImageUrl",
+        "heroImageUrl", "heroImage", "backgroundUrl", "backgroundImageUrl",
+        "logoUrl", "logoURL", "logo",
+        "profileImageUrl", "profilePhotoUrl", "profilePhoto", "profileImage",
+        "photoUrl", "photoURL", "avatarUrl", "avatar",
+        "hostPosterUrl", "hostLogoUrl",
+        "stillUrl", "videoThumbnailUrl", "previewImageUrl"
+    ]
+
+    art = getFirstTextField(item, fields)
+    if hasText(art) then return art
+    homeFallback = getFirstTextField(m.homeData, ["heroImageUrl", "heroImage", "imageUrl", "image", "posterUrl", "backgroundImageUrl", "bannerUrl"])
+    if hasText(homeFallback) then return homeFallback
+    return ""
+end function
+
+function getLogoArtwork(item as object) as string
+    if item = invalid then return ""
+    fields = [
+        "logoUrl", "logoURL", "logo",
+        "profileImageUrl", "profilePhotoUrl", "profilePhoto", "profileImage",
+        "avatarUrl", "avatar", "photoUrl", "photoURL",
+        "posterUrl", "posterURL", "poster",
+        "imageUrl", "imageURL", "image"
+    ]
+
+    return getFirstTextField(item, fields)
+end function
+
+function getFirstTextField(item as object, fields as object) as string
+    if item = invalid or fields = invalid then return ""
+
+    for each fieldName in fields
+        value = item[fieldName]
+        text = getTextFromImageValue(value)
+        if hasText(text) then return text
+    end for
+
+    return ""
+end function
+
+function getTextFromImageValue(value as dynamic) as string
+    if hasText(value) then return value
+    if value = invalid then return ""
+
+    valueType = Type(value)
+    if valueType = "roAssociativeArray"
+        nestedFields = ["url", "downloadUrl", "downloadURL", "src", "uri", "href", "fullPath"]
+
+        for each nestedField in nestedFields
+            text = getTextFromImageValue(value[nestedField])
+            if hasText(text) then return text
+        end for
+    end if
+
+    return ""
+end function
+
+function getTileColor(cardType as string) as string
+    if cardType = "host" then return "0x0F2A4DFF"
+    return "0x101B2EFF"
+end function
+
+function normalizeBrand(value as dynamic) as string
+    title = safeText(value, "EFTV")
+    lowered = LCase(title)
+    if Instr(1, lowered, "executive") > 0 and Instr(1, lowered, "function") > 0 then return "EFTV"
+    if title = "EFC TV" or title = "EFCTV" then return "EFTV"
+    return title
+end function
+
+function safeText(value as dynamic, fallback as string) as string
+    if hasText(value) then return value
+    return fallback
+end function
+
+function hasText(value as dynamic) as boolean
+    if value = invalid then return false
+    valueType = Type(value)
+    if valueType <> "String" and valueType <> "roString" then return false
+    if value = "" then return false
+    return true
+end function
+
+function formatSeconds(value as dynamic) as string
+    total = 0
+    if value <> invalid then total = Int(value)
+    minutes = Int(total / 60)
+    seconds = total - (minutes * 60)
+
+    if seconds < 10
+        return minutes.ToStr() + ":0" + seconds.ToStr()
+    end if
+
+    return minutes.ToStr() + ":" + seconds.ToStr()
+end function
+
+sub clearGroup(group as object)
+    if group = invalid then return
+    count = group.GetChildCount()
+    if count > 0 then group.RemoveChildrenIndex(count, 0)
+end sub
+
+sub setStatus(message as string)
+    if m.statusLabel <> invalid then m.statusLabel.text = message
 end sub
